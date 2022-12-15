@@ -11,6 +11,7 @@
 #include "addons/jslider.h"
 #include "addons/reverse.h"
 #include "addons/turbo.h"
+#include "addons/input_macro.h"
 
 // Pico includes
 #include "pico/bootrom.h"
@@ -65,6 +66,7 @@ void GP2040::setup() {
 	addons.LoadAddon(new JSliderInput(), CORE0_INPUT);
 	addons.LoadAddon(new ReverseInput(), CORE0_INPUT);
 	addons.LoadAddon(new TurboInput(), CORE0_INPUT);
+	addons.LoadAddon(new InputMacro(), CORE0_INPUT);
 }
 
 void GP2040::run() {
