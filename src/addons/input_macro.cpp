@@ -1,5 +1,6 @@
 #include "addons/input_macro.h"
 #include "storagemanager.h"
+#include "picolight.h"
 
 #include "GamepadState.h"
 
@@ -47,13 +48,25 @@ bool InputMacro::available() {
     return gamepad->pressedB4();
 }
 
+enum MacroType {
+    ON_RELEASE,
+    ON_HOLD,
+    ON_HOLD_REPEAT
+};
+
 struct Input {
     GamepadState state;
     int duration = -1;
 };
 
+struct Macro {
+    Input *inputs;
+    wchar_t *name;
+    MacroType type;
+    int size;
+};
 
-Input inputs[] = {
+Input _inputsHadouken[] = {
     {
         { .dpad = GAMEPAD_MASK_DOWN }
     },
@@ -66,6 +79,56 @@ Input inputs[] = {
     }
 };
 
+Macro hadouken = {
+    .inputs = _inputsHadouken,
+    .name = L"Hadouken",
+    .type = ON_RELEASE,
+    .size = 3
+};
+
+Input _inputsShoryuken[] = {
+    {
+        { .dpad = GAMEPAD_MASK_RIGHT }
+    },
+    {
+        { .dpad = GAMEPAD_MASK_DOWN }
+    },
+    {
+        { .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_RIGHT,
+          .buttons = GAMEPAD_MASK_B4  }
+    }
+};
+
+Macro shoryuken = {
+    .inputs = _inputsShoryuken,
+    .name = L"Shoryuken",
+    .type = ON_RELEASE,
+    .size = 3
+};
+
+Input _inputsTatsu[] = {
+    {
+        { .dpad = GAMEPAD_MASK_DOWN }
+    },
+    {
+        { .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_LEFT }
+    },
+    {
+        { .dpad = GAMEPAD_MASK_LEFT,
+          .buttons = GAMEPAD_MASK_B2  }
+    }
+};
+
+Macro tatsu = {
+    .inputs = _inputsTatsu,
+    .name = L"Tatsumaki Senpuukyaku",
+    .type = ON_RELEASE,
+    .size = 3
+};
+
+Macro macroList[3] = { hadouken, shoryuken, tatsu };
+
+int macroPosition = 0;
 int position = 0;
 bool isProcessing = 0;
 int bootselRaised = -1;
@@ -84,6 +147,7 @@ void InputMacro::process()
 
     if (bootselRaised == -1) {
         if (get_bootsel_button()) {
+            light_up(true);
             bootselRaised = 0;
         }
     } else {
@@ -94,6 +158,8 @@ void InputMacro::process()
         }
     }
 
+    auto inputs = macroList[macroPosition].inputs;
+
     if (!isProcessing && bootselRaised > 0) {
         isProcessing = 1;
         heldAt = getMillis();
@@ -103,18 +169,18 @@ void InputMacro::process()
     if (!isProcessing) return;
     
     Gamepad * gamepad = Storage::getInstance().GetGamepad();
-    Input currentInput = inputs[position];
-
-    gamepad->state = currentInput.state;
+    gamepad->state = inputs[position].state;
     
     if ((getMillis() - heldAt) >= shouldHold) {
         heldAt = getMillis(); position++;
         shouldHold = inputs[position].duration == -1 ? INPUT_HOLD_MS : inputs[position].duration;
     }
     
-    if (isProcessing && position >= (sizeof(inputs) / sizeof(Input))) {
+    if (isProcessing && position >= (sizeof(Input) * hadouken.size / sizeof(Input))) {
         position = 0;
         isProcessing = 0;
         bootselRaised = -1;
+        macroPosition = (++macroPosition) % (sizeof(macroList) / sizeof(Macro));
+        light_up(false);
     }
 }
