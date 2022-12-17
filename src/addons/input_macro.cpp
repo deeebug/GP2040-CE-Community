@@ -1,6 +1,5 @@
 #include "addons/input_macro.h"
 #include "storagemanager.h"
-#include "picolight.h"
 
 #include "GamepadState.h"
 
@@ -82,7 +81,7 @@ Input _inputsHadouken[] = {
 Macro hadouken = {
     .inputs = _inputsHadouken,
     .name = L"Hadouken",
-    .type = ON_RELEASE,
+    .type = ON_HOLD_REPEAT,
     .size = 3
 };
 
@@ -131,36 +130,46 @@ Macro macroList[3] = { hadouken, shoryuken, tatsu };
 int macroPosition = 0;
 int position = 0;
 bool isProcessing = 0;
-int bootselRaised = -1;
-int heldAt = 0;
+int bootselPressed = 0;
+int64_t heldAt = 0;
 int shouldHold = INPUT_HOLD_MS;
+bool trigger = false;
+int prevBootselPressed = 0;
 
 void InputMacro::setup() {
     position = 0;
     isProcessing = 0;
-    bootselRaised = -1;
+    bootselPressed = 0;
 }
 
 void InputMacro::process()
 {
     if (getMillis() < 1000) return;
-
-    if (bootselRaised == -1) {
-        if (get_bootsel_button()) {
-            light_up(true);
-            bootselRaised = 0;
-        }
-    } else {
-        if (!get_bootsel_button()) {
-            if (bootselRaised == 0) {
-                bootselRaised = 1;
-            }
+    macroPosition = 0;
+    auto macro = macroList[macroPosition];
+    
+    bootselPressed = get_bootsel_button();
+    if (!isProcessing) {
+        switch (macro.type) {
+            case ON_RELEASE:
+                trigger = prevBootselPressed && !bootselPressed;
+                break;
+            case ON_HOLD:
+                trigger = !prevBootselPressed && bootselPressed;
+                break;
+            case ON_HOLD_REPEAT:
+                trigger = bootselPressed;
+                break;
+            default:
+                break;
         }
     }
 
-    auto inputs = macroList[macroPosition].inputs;
+    prevBootselPressed = bootselPressed;
 
-    if (!isProcessing && bootselRaised > 0) {
+    auto inputs = macro.inputs;
+
+    if (!isProcessing && trigger) {
         isProcessing = 1;
         heldAt = getMillis();
         shouldHold = inputs[position].duration == -1 ? INPUT_HOLD_MS : inputs[position].duration;
@@ -176,11 +185,10 @@ void InputMacro::process()
         shouldHold = inputs[position].duration == -1 ? INPUT_HOLD_MS : inputs[position].duration;
     }
     
-    if (isProcessing && position >= (sizeof(Input) * hadouken.size / sizeof(Input))) {
+    if (isProcessing && position >= ((sizeof(Input) * hadouken.size) / sizeof(Input))) {
         position = 0;
         isProcessing = 0;
-        bootselRaised = -1;
         macroPosition = (++macroPosition) % (sizeof(macroList) / sizeof(Macro));
-        light_up(false);
+        trigger = false;
     }
 }
