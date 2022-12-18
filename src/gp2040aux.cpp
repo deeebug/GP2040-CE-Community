@@ -4,10 +4,12 @@
 
 #include "storagemanager.h" // Global Managers
 #include "addonmanager.h"
+#include "pico/stdio.h"
 
-#include "addons/i2cdisplay.h" // Add-Ons
-#include "addons/neopicoleds.h"
-#include "addons/playerleds.h"
+// #include "addons/i2cdisplay.h" // Add-Ons
+// #include "addons/neopicoleds.h"
+// #include "addons/playerleds.h"
+#include "addons/boardled.h"
 
 #include <iterator>
 
@@ -18,13 +20,17 @@ GP2040Aux::~GP2040Aux() {
 }
 
 void GP2040Aux::setup() {
-	addons.LoadAddon(new I2CDisplayAddon(), CORE1_LOOP);
-	addons.LoadAddon(new NeoPicoLEDAddon(), CORE1_LOOP);
-	addons.LoadAddon(new PlayerLEDAddon(), CORE1_LOOP);
+// 	addons.LoadAddon(new I2CDisplayAddon(), CORE1_LOOP);
+// 	addons.LoadAddon(new NeoPicoLEDAddon(), CORE1_LOOP);
+	// addons.LoadAddon(new PlayerLEDAddon(), CORE1_LOOP);
+	addons.LoadAddon(new BoardLedAddon(), CORE1_LOOP, true);
 }
 
 void GP2040Aux::run() {
 	while (1) {
+		// gpio_init(25);
+		// gpio_set_dir(25, GPIO_OUT);
+		// gpio_put(25, 1);
 		if (nextRuntime > getMicro()) { // fix for unsigned
 			sleep_us(50); // Give some time back to our CPU (lower power consumption)
 			continue;
