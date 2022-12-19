@@ -50,7 +50,8 @@ bool InputMacro::available() {
 enum MacroType {
     ON_RELEASE,
     ON_HOLD,
-    ON_HOLD_REPEAT
+    ON_HOLD_REPEAT,
+    ON_RELEASE_TOGGLE
 };
 
 struct Input {
@@ -125,7 +126,23 @@ Macro tatsu = {
     .size = 3
 };
 
-Macro macroList[3] = { hadouken, shoryuken, tatsu };
+Input _inputsFf7[] = {
+    {{ .dpad = 0 }, .duration = 200},  {{ .dpad = GAMEPAD_MASK_RIGHT }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 200},  {{ .dpad = GAMEPAD_MASK_LEFT }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500}
+};
+
+Macro ff7 = {
+    .inputs = _inputsFf7,
+    .name = L"Ff7",
+    .type = ON_RELEASE_TOGGLE,
+    .size = 12
+};
+
+Macro macroList[4] = { ff7, hadouken, shoryuken, tatsu };
 
 int macroPosition = 0;
 int position = 0;
@@ -151,6 +168,7 @@ void InputMacro::process()
     bootselPressed = get_bootsel_button();
     if (!isProcessing) {
         switch (macro.type) {
+            case ON_RELEASE_TOGGLE:
             case ON_RELEASE:
                 trigger = prevBootselPressed && !bootselPressed;
                 break;
@@ -161,6 +179,13 @@ void InputMacro::process()
                 trigger = bootselPressed;
                 break;
             default:
+                break;
+        }
+    } else {
+        switch (macro.type) {
+            case ON_RELEASE_TOGGLE:
+                if (prevBootselPressed && !bootselPressed)
+                    trigger = false;
                 break;
         }
     }
@@ -185,10 +210,10 @@ void InputMacro::process()
         shouldHold = inputs[position].duration == -1 ? INPUT_HOLD_MS : inputs[position].duration;
     }
     
-    if (isProcessing && position >= ((sizeof(Input) * hadouken.size) / sizeof(Input))) {
+    if (isProcessing && position >= ((sizeof(Input) * macro.size) / sizeof(Input))) {
         position = 0;
-        isProcessing = 0;
-        macroPosition = (++macroPosition) % (sizeof(macroList) / sizeof(Macro));
-        trigger = false;
+        isProcessing = (macro.type == ON_RELEASE_TOGGLE && trigger) ? 1 : 0;
+        macroPosition = (macro.type == ON_RELEASE_TOGGLE && trigger) ? macroPosition : (++macroPosition) % (sizeof(macroList) / sizeof(Macro));
+        trigger = isProcessing;
     }
 }
