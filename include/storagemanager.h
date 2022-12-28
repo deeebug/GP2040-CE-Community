@@ -10,6 +10,8 @@
 #include "NeoPico.hpp"
 #include "FlashPROM.h"
 
+#include "addons/input_macro.h"
+
 #include "enums.h"
 #include "helper.h"
 #include "gamepad.h"
@@ -80,6 +82,44 @@ struct BoardOptions
 struct SplashImage {
 	uint8_t data[16*64];
 	uint32_t checksum;
+};
+
+class Macros {
+	public:
+		Macros(uint32_t checksum, int size, Macro* list)
+            : checksum(checksum), size(size), list(list) {}
+
+		Macros()
+			: checksum(CHECKSUM_MAGIC), size(0), list({}) {}
+
+        bool operator==(Macros& other) const {
+            bool result = size == other.size;
+            if (!result) return result;
+            for (size_t i = 0; i < size; i++)
+            {
+                result = result && list[i] == other.list[i];
+                if (!result) return result;
+            }
+            
+            return result;
+        }
+
+        bool operator!=(Macros& other) const {
+            return !operator==(other);
+        }
+			
+        size_t sizeOf() {
+            size_t totalInputsSize = 0;
+			for (size_t i = 0; i < size; i++)
+			{
+				totalInputsSize += list[i].sizeOf();
+			}
+            return totalInputsSize + sizeof(size) + sizeof(checksum);
+        }
+
+		uint32_t checksum;
+		int size;
+		Macro* list;
 };
 
 struct LEDOptions
@@ -159,16 +199,22 @@ public:
 	int GetSplashMode();
 	int GetSplashChoice();
 
+	void setDefaultMacros();
+	Macros getMacrosForInit();
+	void setMacros(Macros);
+
 private:
 	Storage() : gamepad(0) {
 		EEPROM.start(); // init EEPROM
 		initBoardOptions();
 		initLEDOptions();
 		initSplashImage();
+		initMacros();
 	}
 	void initBoardOptions();
 	void initLEDOptions();
 	void initSplashImage();
+	void initMacros();
 	bool CONFIG_MODE; 			// Config mode (boot)
 	Gamepad * gamepad;    		// Gamepad data
 	Gamepad * processedGamepad; // Gamepad with ONLY processed data
@@ -176,6 +222,7 @@ private:
 	LEDOptions ledOptions;
 	uint8_t featureData[32]; // USB X-Input Feature Data
 	SplashImage splashImage;
+	Macros macros;
 };
 
 #endif

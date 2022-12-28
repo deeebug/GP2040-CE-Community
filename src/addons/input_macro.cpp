@@ -41,131 +41,49 @@ bool __no_inline_not_in_flash_func(get_bootsel_button)() {
     return button_state;
 }
 
+Macro *createMacro(Input* inputs, const char* name, MacroType type, int size) {
+    Macro* macro = new Macro;
+    macro->inputs = inputs;
+    macro->size = size;
+    macro->type = type;
+    macro->name = name;
+
+    return macro;
+}
+
 bool InputMacro::available() {
 	return true;
     Gamepad * gamepad = Storage::getInstance().GetGamepad();
     return gamepad->pressedB4();
 }
 
-enum MacroType {
-    ON_RELEASE,
-    ON_HOLD,
-    ON_HOLD_REPEAT,
-    ON_RELEASE_TOGGLE
-};
-
-struct Input {
-    GamepadState state;
-    int duration = -1;
-};
-
-struct Macro {
-    Input *inputs;
-    wchar_t *name;
-    MacroType type;
-    int size;
-};
-
-Input _inputsHadouken[] = {
-    {
-        { .dpad = GAMEPAD_MASK_DOWN }
-    },
-    {
-        { .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_RIGHT }
-    },
-    {
-        { .dpad = GAMEPAD_MASK_RIGHT,
-          .buttons = GAMEPAD_MASK_B4  }
-    }
-};
-
-Macro hadouken = {
-    .inputs = _inputsHadouken,
-    .name = L"Hadouken",
-    .type = ON_HOLD_REPEAT,
-    .size = 3
-};
-
-Input _inputsShoryuken[] = {
-    {
-        { .dpad = GAMEPAD_MASK_RIGHT }
-    },
-    {
-        { .dpad = GAMEPAD_MASK_DOWN }
-    },
-    {
-        { .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_RIGHT,
-          .buttons = GAMEPAD_MASK_B4  }
-    }
-};
-
-Macro shoryuken = {
-    .inputs = _inputsShoryuken,
-    .name = L"Shoryuken",
-    .type = ON_RELEASE,
-    .size = 3
-};
-
-Input _inputsTatsu[] = {
-    {
-        { .dpad = GAMEPAD_MASK_DOWN }
-    },
-    {
-        { .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_LEFT }
-    },
-    {
-        { .dpad = GAMEPAD_MASK_LEFT,
-          .buttons = GAMEPAD_MASK_B2  }
-    }
-};
-
-Macro tatsu = {
-    .inputs = _inputsTatsu,
-    .name = L"Tatsumaki Senpuukyaku",
-    .type = ON_RELEASE,
-    .size = 3
-};
-
-Input _inputsFf7[] = {
-    {{ .dpad = 0 }, .duration = 200},  {{ .dpad = GAMEPAD_MASK_RIGHT }, .duration = 500},
-    {{ .dpad = 0 }, .duration = 200},  {{ .dpad = GAMEPAD_MASK_LEFT }, .duration = 500},
-    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
-    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
-    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
-    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500}
-};
-
-Macro ff7 = {
-    .inputs = _inputsFf7,
-    .name = L"Ff7",
-    .type = ON_RELEASE_TOGGLE,
-    .size = 12
-};
-
-Macro macroList[4] = { ff7, hadouken, shoryuken, tatsu };
+Macros macros;
 
 int macroPosition = 0;
 int position = 0;
-bool isProcessing = 0;
 int bootselPressed = 0;
-int64_t heldAt = 0;
 int shouldHold = INPUT_HOLD_MS;
-bool trigger = false;
 int prevBootselPressed = 0;
+bool isProcessing = 0;
+bool trigger = false;
+bool hasInit = false;
+int64_t heldAt = 0;
 
 void InputMacro::setup() {
     position = 0;
     isProcessing = 0;
     bootselPressed = 0;
+    macros = Storage::getInstance().getMacrosForInit();
 }
 
 void InputMacro::process()
 {
-    if (getMillis() < 1000) return;
+    if (!hasInit) { if (getMillis() < 1000) return; else hasInit = true; }
     macroPosition = 0;
-    auto macro = macroList[macroPosition];
+    auto macro = macros.list[macroPosition];
     
     bootselPressed = get_bootsel_button();
+    // light_up(bootselPressed);
     if (!isProcessing) {
         switch (macro.type) {
             case ON_RELEASE_TOGGLE:
@@ -210,10 +128,14 @@ void InputMacro::process()
         shouldHold = inputs[position].duration == -1 ? INPUT_HOLD_MS : inputs[position].duration;
     }
     
-    if (isProcessing && position >= ((sizeof(Input) * macro.size) / sizeof(Input))) {
+    if (isProcessing && position >= (macro.size)) {
         position = 0;
-        isProcessing = (macro.type == ON_RELEASE_TOGGLE && trigger) ? 1 : 0;
-        macroPosition = (macro.type == ON_RELEASE_TOGGLE && trigger) ? macroPosition : (++macroPosition) % (sizeof(macroList) / sizeof(Macro));
-        trigger = isProcessing;
+        trigger = trigger && macro.type == ON_RELEASE_TOGGLE;
+        isProcessing = trigger;
+        macroPosition = (macro.type == ON_RELEASE_TOGGLE && trigger) ? macroPosition : (++macroPosition) % (macros.size);
+        if (macro.type == ON_RELEASE_TOGGLE && !trigger) {
+            heldAt = 0;
+            shouldHold = INPUT_HOLD_MS;
+        }
     }
 }

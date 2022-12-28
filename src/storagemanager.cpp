@@ -311,3 +311,185 @@ void AnimationStorage::save()
 	if (dirty)
 		EEPROM.commit();
 }
+
+Macro* getMacroFromBuffer(char* buffer) {
+    int inputSize = 0;
+    memcpy(&inputSize, buffer, sizeof(int));
+    buffer += sizeof(int);
+	
+	// std::vector<Input> inputs(0);
+    Input* inputs = new Input[inputSize];
+	memcpy(inputs, buffer, sizeof(Input) * inputSize);
+	// for (size_t i = 0; i < inputSize; i++)
+	// {
+	// 	Input input;
+	// 	memcpy(&input, buffer, sizeof(Input));
+	// 	inputs.push_back(input);
+	// 	buffer += sizeof(Input);
+	// }
+	
+    // std::vector<Input> inputs((Input *) (buffer), ((Input *) buffer) + inputSize);
+    buffer += sizeof(Input) * inputSize;
+	
+    int nameLength = 0;
+    memcpy(&nameLength, buffer, sizeof(int));
+    buffer += sizeof(int);
+
+    std::string name(buffer, buffer + nameLength);
+    buffer += sizeof(char) * nameLength;
+
+    MacroType macroType;
+    memcpy(&macroType, buffer, sizeof(MacroType));
+    buffer += sizeof(MacroType);
+	
+    return createMacro(inputs, name.data(), macroType, inputSize);
+}
+
+void macroToBuffer(Macro macro, char* buffer) {
+    memcpy(buffer, &macro.size, sizeof(int));
+    buffer += sizeof(int);
+
+	for (size_t i = 0; i < macro.size; i++)
+	{
+		memcpy(buffer, &(macro.inputs[i]), sizeof(Input));
+    	buffer += sizeof(Input);
+	}
+	
+    // memcpy(buffer, macro.inputs.data(), sizeof(Input) * macro.inputs.size());
+    // buffer += sizeof(Input) * macro.size;
+
+    int nameLength = macro.name.size() + 1;
+    memcpy(buffer, &nameLength, sizeof(int));
+    buffer += sizeof(int);
+
+    memcpy(buffer, macro.name.c_str(), nameLength);
+    buffer += sizeof(char) * (nameLength);
+
+    MacroType macroType = macro.type;
+    memcpy(buffer, &macroType, sizeof(MacroType));
+    buffer += sizeof(MacroType);
+}
+
+const Macros getMacrosFromBuffer(char* buffer) {
+    uint32_t checksum;
+    memcpy(&checksum, buffer, sizeof(uint32_t));
+    buffer += sizeof(uint32_t);
+
+    int inputSize = 0;
+    memcpy(&inputSize, buffer, sizeof(int));
+    buffer += sizeof(int);
+
+    Macro* list = new Macro[inputSize];
+    for (size_t i = 0; i < inputSize; i++)
+    {
+        (list[i]) = (*getMacroFromBuffer(buffer));    
+    }
+    
+    // Macro *list = getMacroFromBuffer(buffer);
+    return Macros(checksum, inputSize, list);
+}
+
+void macrosToBuffer(Macros macros, char* buffer) {
+    uint32_t* checksum = &macros.checksum;
+    memcpy(buffer, &macros.checksum, sizeof(uint32_t));
+    buffer += sizeof(uint32_t);
+
+    memcpy(buffer, &macros.size, sizeof(int));
+    buffer += sizeof(int);
+
+    for (size_t i = 0; i < macros.size; i++)
+    {
+        macroToBuffer(macros.list[i], buffer);
+    }
+}
+
+void Storage::setMacros(Macros newMacros)
+{
+	if (macros != newMacros)
+	{
+		newMacros.checksum = CHECKSUM_MAGIC; // set checksum to magic number
+		newMacros.checksum = CRC32::calculate(&newMacros);
+		char * macroBuffer =  ((char *) EEPROM.getBuffer()) + MACRO_STORAGE_INDEX;
+		char * macroBufferCopy =  ((char *) EEPROM.getBuffer()) + MACRO_STORAGE_INDEX;
+		macrosToBuffer(newMacros, macroBuffer);
+		EEPROM.commit();
+		macros = getMacrosFromBuffer(macroBufferCopy);
+	}
+}
+
+Input _inputsShoryuken[] = {
+    {{ .dpad = GAMEPAD_MASK_RIGHT }, .duration = 100},
+    {{ .dpad = GAMEPAD_MASK_DOWN }, .duration = 100},
+    {{ .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_RIGHT, .buttons = GAMEPAD_MASK_B4 }, .duration = 100}
+};
+
+const Macro* sampleMacro = createMacro(
+    _inputsShoryuken,
+    "Shoryuken",
+    ON_HOLD,
+    3
+);
+
+Input _inputsFf7[] = {
+    {{ .dpad = 0 }, .duration = 200},  {{ .dpad = GAMEPAD_MASK_RIGHT }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 200},  {{ .dpad = GAMEPAD_MASK_LEFT }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500},
+    {{ .dpad = 0 }, .duration = 500},  {{ .dpad = 0, .buttons = GAMEPAD_MASK_B2 }, .duration = 500}
+};
+
+const Macro* sampleMacro2 = createMacro(
+    _inputsFf7,
+    "Ff7",
+    ON_RELEASE_TOGGLE,
+    12
+);
+
+Input _inputsTatsu[] = {
+    {{ .dpad = GAMEPAD_MASK_DOWN }, .duration = 100},
+    {{ .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_LEFT }, .duration = 100},
+    {{ .dpad = GAMEPAD_MASK_LEFT, .buttons = GAMEPAD_MASK_B2 }, .duration = 100}
+};
+
+const Macro* sampleMacro3 = createMacro(
+    _inputsTatsu,
+    "Tatsumaki Senpuukyaku",
+    ON_RELEASE,
+    3
+);
+
+Input _inputsHadouken[] = {
+    {{ .dpad = GAMEPAD_MASK_DOWN }, .duration = 100},
+    {{ .dpad = GAMEPAD_MASK_DOWN | GAMEPAD_MASK_RIGHT }, .duration = 100},
+    {{ .dpad = GAMEPAD_MASK_RIGHT, .buttons = GAMEPAD_MASK_B4 }, .duration = 100}
+};
+
+const Macro* sampleMacro4 = createMacro(
+    _inputsHadouken,
+    "Hadouken",
+    ON_HOLD_REPEAT,
+    3
+);
+
+void Storage::setDefaultMacros()
+{
+	macros.list = new Macro[1];
+	macros.list[0] = (*sampleMacro);
+	macros.size = 1;
+	setMacros(macros);
+}
+
+void Storage::initMacros() {
+	macros = getMacrosFromBuffer(((char *) EEPROM.getBuffer()) + MACRO_STORAGE_INDEX);
+	uint32_t lastCRC = macros.checksum;
+	macros.checksum = CHECKSUM_MAGIC;
+	if (lastCRC != CRC32::calculate(&macros)) {
+		setDefaultMacros();
+	}
+}
+
+Macros Storage::getMacrosForInit()
+{
+	return macros;
+}

@@ -35,12 +35,34 @@ class FlashPROM
 		}
 
 		template<typename T>
+		T &get(uint16_t const index, T &value, size_t size)
+		{
+			if (index < EEPROM_SIZE_BYTES)
+				memcpy(&value, &cache[index], size);
+
+			return value;
+		}
+
+		template<typename T>
 		void set(uint16_t const index, const T &value)
 		{
 			uint16_t size = sizeof(T);
 
 			if ((index + size) <= EEPROM_SIZE_BYTES)
 				memcpy(&cache[index], &value, sizeof(T));
+		}
+
+		template<typename T>
+		void set(uint16_t const index, const T &value, size_t size)
+		{
+			if ((index + size) <= EEPROM_SIZE_BYTES) {
+				memcpy(&cache[index], &value, size);
+			}
+		}
+
+		void* getBuffer()
+		{
+			return cache;
 		}
 
 	private:
