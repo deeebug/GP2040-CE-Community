@@ -14,11 +14,12 @@
 #include "helper.h"
 #include "gamepad.h"
 
-#define GAMEPAD_STORAGE_INDEX      		0    // 1024 bytes for gamepad options
-#define BOARD_STORAGE_INDEX     		1024 //  512 bytes for hardware options
-#define LED_STORAGE_INDEX       		1536 //  512 bytes for LED configuration
-#define ANIMATION_STORAGE_INDEX 		2048 // 1024 bytes for LED animations
-#define SPLASH_IMAGE_STORAGE_INDEX		2560
+#define GAMEPAD_STORAGE_INDEX      	0
+#define BOARD_STORAGE_INDEX     	GAMEPAD_STORAGE_INDEX + 1024 // 1024 bytes for gamepad options
+#define LED_STORAGE_INDEX       	BOARD_STORAGE_INDEX + 256 //  512 bytes for hardware options
+#define ANIMATION_STORAGE_INDEX 	LED_STORAGE_INDEX + 256 //  512 bytes for LED configuration
+#define SPLASH_IMAGE_STORAGE_INDEX	ANIMATION_STORAGE_INDEX + 256 // 256 bytes for LED animations
+#define MACRO_STORAGE_INDEX	        SPLASH_IMAGE_STORAGE_INDEX + 1036 // sizeof(size_t) for Splash image
 
 #define CHECKSUM_MAGIC          0 	// Checksum CRC
 
