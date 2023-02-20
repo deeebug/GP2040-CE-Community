@@ -106,6 +106,7 @@ src/addonmanager.cpp
 src/configmanager.cpp
 src/storagemanager.cpp
 src/system.cpp
+src/display_button_layouts.cpp
 src/configs/webconfig.cpp
 src/addons/analog.cpp
 src/addons/board_led.cpp

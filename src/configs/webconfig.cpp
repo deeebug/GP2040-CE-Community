@@ -41,6 +41,8 @@
 #define API_SET_SPLASH_IMAGE "/api/setSplashImage"
 #define API_GET_FIRMWARE_VERSION "/api/getFirmwareVersion"
 #define API_GET_MEMORY_REPORT "/api/getMemoryReport"
+#define API_GET_DISPLAY_BUTTON_LAYOUTS "/api/getDisplayButtonLayouts"
+#define API_GET_DISPLAY_BUTTON_LAYOUTS_RIGHT "/api/getDisplayButtonLayoutsRight"
 #if !defined(NDEBUG)
 #define API_POST_ECHO "/api/echo"
 #endif
@@ -198,17 +200,17 @@ std::string setDisplayOptions(BoardOptions& boardOptions)
 	boardOptions.splashChoice          = doc["splashChoice"];
 	boardOptions.displaySaverTimeout   = doc["displaySaverTimeout"];
 
-	boardOptions.buttonLayoutCustomOptions.params.layout 		 	       = doc["buttonLayoutCustomOptions"]["params"]["layout"];
-	boardOptions.buttonLayoutCustomOptions.params.startX 		 	       = doc["buttonLayoutCustomOptions"]["params"]["startX"];
-	boardOptions.buttonLayoutCustomOptions.params.startY 		 	       = doc["buttonLayoutCustomOptions"]["params"]["startY"];
-	boardOptions.buttonLayoutCustomOptions.params.buttonRadius      	   = doc["buttonLayoutCustomOptions"]["params"]["buttonRadius"];
-	boardOptions.buttonLayoutCustomOptions.params.buttonPadding     	   = doc["buttonLayoutCustomOptions"]["params"]["buttonPadding"];
+	boardOptions.buttonLayout 		 	       = doc["buttonLayout"];
+	boardOptions.displayButtonLayoutParams.startX 		 	       = doc["displayButtonLayoutParams"]["startX"];
+	boardOptions.displayButtonLayoutParams.startY 		 	       = doc["displayButtonLayoutParams"]["startY"];
+	boardOptions.displayButtonLayoutParams.buttonRadius      	   = doc["displayButtonLayoutParams"]["buttonRadius"];
+	boardOptions.displayButtonLayoutParams.buttonPadding     	   = doc["displayButtonLayoutParams"]["buttonPadding"];
 	
-	boardOptions.buttonLayoutCustomOptions.paramsRight.layoutRight 	   	   = doc["buttonLayoutCustomOptions"]["paramsRight"]["layout"];
-	boardOptions.buttonLayoutCustomOptions.paramsRight.startX 		 	   = doc["buttonLayoutCustomOptions"]["paramsRight"]["startX"];
-	boardOptions.buttonLayoutCustomOptions.paramsRight.startY 		 	   = doc["buttonLayoutCustomOptions"]["paramsRight"]["startY"];
-	boardOptions.buttonLayoutCustomOptions.paramsRight.buttonRadius  	   = doc["buttonLayoutCustomOptions"]["paramsRight"]["buttonRadius"];
-	boardOptions.buttonLayoutCustomOptions.paramsRight.buttonPadding       = doc["buttonLayoutCustomOptions"]["paramsRight"]["buttonPadding"];
+	boardOptions.buttonLayoutRight 	   	   = doc["buttonLayoutRight"];
+	boardOptions.displayButtonLayoutParamsRight.startX 		 	   = doc["displayButtonLayoutParamsRight"]["startX"];
+	boardOptions.displayButtonLayoutParamsRight.startY 		 	   = doc["displayButtonLayoutParamsRight"]["startY"];
+	boardOptions.displayButtonLayoutParamsRight.buttonRadius  	   = doc["displayButtonLayoutParamsRight"]["buttonRadius"];
+	boardOptions.displayButtonLayoutParamsRight.buttonPadding       = doc["displayButtonLayoutParamsRight"]["buttonPadding"];
 
 	return serialize_json(doc);
 }
@@ -248,17 +250,17 @@ std::string getDisplayOptions() // Manually set Document Attributes for the disp
 	doc["splashChoice"]      = boardOptions.splashChoice;
 	doc["displaySaverTimeout"] = boardOptions.displaySaverTimeout;
 
-	doc["buttonLayoutCustomOptions"]["params"]["layout"] 		 	 = boardOptions.buttonLayoutCustomOptions.params.layout;
-	doc["buttonLayoutCustomOptions"]["params"]["startX"] 		 	 = boardOptions.buttonLayoutCustomOptions.params.startX;
-	doc["buttonLayoutCustomOptions"]["params"]["startY"] 		 	 = boardOptions.buttonLayoutCustomOptions.params.startY;
-	doc["buttonLayoutCustomOptions"]["params"]["buttonRadius"]  	 = boardOptions.buttonLayoutCustomOptions.params.buttonRadius;
-	doc["buttonLayoutCustomOptions"]["params"]["buttonPadding"] 	 = boardOptions.buttonLayoutCustomOptions.params.buttonPadding;
+	doc["buttonLayout"] 		 	 = boardOptions.buttonLayout;
+	doc["displayButtonLayoutParams"]["startX"] 		 	 = boardOptions.displayButtonLayoutParams.startX;
+	doc["displayButtonLayoutParams"]["startY"] 		 	 = boardOptions.displayButtonLayoutParams.startY;
+	doc["displayButtonLayoutParams"]["buttonRadius"]  	 = boardOptions.displayButtonLayoutParams.buttonRadius;
+	doc["displayButtonLayoutParams"]["buttonPadding"] 	 = boardOptions.displayButtonLayoutParams.buttonPadding;
 	
-	doc["buttonLayoutCustomOptions"]["paramsRight"]["layout"] 		 = boardOptions.buttonLayoutCustomOptions.paramsRight.layoutRight;
-	doc["buttonLayoutCustomOptions"]["paramsRight"]["startX"] 		 = boardOptions.buttonLayoutCustomOptions.paramsRight.startX;
-	doc["buttonLayoutCustomOptions"]["paramsRight"]["startY"] 		 = boardOptions.buttonLayoutCustomOptions.paramsRight.startY;
-	doc["buttonLayoutCustomOptions"]["paramsRight"]["buttonRadius"]  = boardOptions.buttonLayoutCustomOptions.paramsRight.buttonRadius;
-	doc["buttonLayoutCustomOptions"]["paramsRight"]["buttonPadding"] = boardOptions.buttonLayoutCustomOptions.paramsRight.buttonPadding;
+	doc["buttonLayoutRight"] 		 = boardOptions.buttonLayoutRight;
+	doc["displayButtonLayoutParamsRight"]["startX"] 		  = boardOptions.displayButtonLayoutParamsRight.startX;
+	doc["displayButtonLayoutParamsRight"]["startY"] 		  = boardOptions.displayButtonLayoutParamsRight.startY;
+	doc["displayButtonLayoutParamsRight"]["buttonRadius"]  = boardOptions.displayButtonLayoutParamsRight.buttonRadius;
+	doc["displayButtonLayoutParamsRight"]["buttonPadding"] = boardOptions.displayButtonLayoutParamsRight.buttonPadding;
 
 	Gamepad * gamepad = Storage::getInstance().GetGamepad();
 	auto usedPins = doc.createNestedArray("usedPins");
@@ -657,6 +659,44 @@ std::string reboot()
 	return serialize_json(doc);
 }
 
+std::string getDisplayButtonLayoutsApi()
+{
+	DynamicJsonDocument doc(LWIP_HTTPD_POST_MAX_PAYLOAD_LEN);
+	std::vector layouts = getDisplayButtonLayouts();
+
+	auto layoutsArray = doc.createNestedArray("layouts");
+	for (auto a: layouts) {
+		auto o = layoutsArray.createNestedObject();
+		o["label"] = a->getName();
+		o["value"] = a->getId().layout;
+		o["params"]["startX"] 		 	 = a->getDefaultParams().startX;
+		o["params"]["startY"] 		 	 = a->getDefaultParams().startY;
+		o["params"]["buttonRadius"]  	 = a->getDefaultParams().buttonRadius;
+		o["params"]["buttonPadding"] 	 = a->getDefaultParams().buttonPadding;
+	}
+
+	return serialize_json(doc);
+}
+
+std::string getDisplayButtonLayoutsRightApi()
+{
+	DynamicJsonDocument doc(LWIP_HTTPD_POST_MAX_PAYLOAD_LEN);	
+	std::vector layoutsRight = getDisplayButtonLayoutsRight();
+
+	auto layoutsRightArray = doc.createNestedArray("layoutsRight");
+	for (auto a: layoutsRight) {
+		auto o = layoutsRightArray.createNestedObject();
+		o["label"] = a->getName();
+		o["value"] = a->getId().layoutRight;
+		o["params"]["startX"] 		 	 = a->getDefaultParams().startX;
+		o["params"]["startY"] 		 	 = a->getDefaultParams().startY;
+		o["params"]["buttonRadius"]  	 = a->getDefaultParams().buttonRadius;
+		o["params"]["buttonPadding"] 	 = a->getDefaultParams().buttonPadding;
+	}
+
+	return serialize_json(doc);
+}
+
 int fs_open_custom(struct fs_file *file, const char *name)
 {
 	if (strcmp(name, API_SET_DISPLAY_OPTIONS) == 0)
@@ -697,6 +737,10 @@ int fs_open_custom(struct fs_file *file, const char *name)
 			return set_file_data(file, getMemoryReport());
 	if (strcmp(name, API_REBOOT) == 0)
 			return set_file_data(file, reboot());
+	if (strcmp(name, API_GET_DISPLAY_BUTTON_LAYOUTS) == 0)
+			return set_file_data(file, getDisplayButtonLayoutsApi());
+	if (strcmp(name, API_GET_DISPLAY_BUTTON_LAYOUTS_RIGHT) == 0)
+			return set_file_data(file, getDisplayButtonLayoutsRightApi());
 
 	bool isExclude = false;
 	for (auto &excludePath : excludePaths)

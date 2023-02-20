@@ -1,7 +1,6 @@
 #ifndef _GAMEPAD_H_
 #define _GAMEPAD_H_
 
-#include "BoardConfig.h"
 #include <string.h>
 #include <MPGS.h>
 #include "pico/stdlib.h"

@@ -6,6 +6,7 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
+#include <unordered_map>
 #include <string>
 #include <hardware/i2c.h>
 #include "OneBitDisplay.h"
@@ -13,6 +14,7 @@
 #include "gpaddon.h"
 #include "gamepad.h"
 #include "storagemanager.h"
+#include "display_button_layouts.h"
 
 #ifndef HAS_I2C_DISPLAY
 #define HAS_I2C_DISPLAY -1
@@ -80,46 +82,11 @@ private:
 	int initDisplay(int typeOverride);
 	bool isSH1106(int detectedDisplay);
 	void clearScreen(int render); // DisplayModule
-	void drawStickless(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawWasdBox(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawArcadeStick(int startX, int startY, int buttonRadius, int buttonPadding);
 	void drawStatusBar(Gamepad*);
 	void drawText(int startX, int startY, std::string text);
 	void initMenu(char**);
 	//Adding my stuff here, remember to sort before PR
-	void drawDiamond(int cx, int cy, int size, uint8_t colour, uint8_t filled);
-	void drawUDLR(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawMAMEA(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawMAMEB(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawKeyboardAngled(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawVewlix(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawVewlix7(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawSega2p(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawNoir8(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawCapcom(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawCapcom6(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawSticklessButtons(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawWasdButtons(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawArcadeButtons(int startX, int startY, int buttonRadius, int buttonPadding);
 	void drawSplashScreen(int splashMode, uint8_t* splashChoice, int splashSpeed);
-	void drawDancepadA(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawDancepadB(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawTwinStickA(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawTwinStickB(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawBlankA(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawBlankB(int startX, int startY, int buttonSize, int buttonPadding);
-	void drawVLXA(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawVLXB(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawButtonLayoutLeft(ButtonLayoutCustomOptions options);
-	void drawButtonLayoutRight(ButtonLayoutCustomOptions options);
-	void drawFightboard(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawFightboardMirrored(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawFightboardStick(int startX, int startY, int buttonRadius, int buttonPadding);
-	void drawFightboardStickMirrored(int startX, int startY, int buttonRadius, int buttonPadding);
-	bool pressedUp();
-	bool pressedDown();
-	bool pressedLeft();
-	bool pressedRight();
 	BoardOptions getBoardOptions();
 	bool isDisplayPowerOff();
 	void setDisplayPower(uint8_t status);
@@ -135,6 +102,10 @@ private:
 	private:
 	DisplayPreviewMode displayPreviewMode;
 	uint16_t prevButtonState;
+	std::unordered_map<ButtonLayout, DisplayButtonLayout*> displayButtonLayoutsLeft;
+	std::unordered_map<ButtonLayoutRight, DisplayButtonLayout*> displayButtonLayoutsRight;
+	//DisplayButtonLayout& selectedDisplayButtonLayoutLeft;
+	//DisplayButtonLayout& selectedDisplayButtonLayoutRight;
 };
 
 #endif

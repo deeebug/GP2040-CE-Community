@@ -13,6 +13,7 @@
 #include "enums.h"
 #include "helper.h"
 #include "gamepad.h"
+#include "display_button_layouts.h"
 
 #define GAMEPAD_STORAGE_INDEX      		0    // 1024 bytes for gamepad options
 #define BOARD_STORAGE_INDEX     		1024 //  512 bytes for hardware options
@@ -77,7 +78,8 @@ struct BoardOptions
 	uint8_t displayFlip;
 	bool displayInvert;
 	int displaySaverTimeout;
-	ButtonLayoutCustomOptions buttonLayoutCustomOptions;
+	DisplayButtonLayoutParams displayButtonLayoutParams;
+	DisplayButtonLayoutParams displayButtonLayoutParamsRight;
 	char boardVersion[32]; // 32-char limit to board name
 	uint32_t checksum;
 };

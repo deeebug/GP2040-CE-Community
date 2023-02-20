@@ -12,8 +12,13 @@
 #include "FlashPROM.h"
 #include "hardware/watchdog.h"
 #include "Animation.hpp"
+#include "display_button_layouts.h"
 #include "CRC32.h"
 #include <sstream>
+#include <algorithm>
+#include <vector>
+#include <iterator>
+#include <map>
 
 #include "addons/analog.h"
 #include "addons/board_led.h"
@@ -103,24 +108,12 @@ void Storage::setDefaultBoardOptions()
 	boardOptions.displayFlip       = DISPLAY_FLIP;
 	boardOptions.displayInvert     = DISPLAY_INVERT;
 	boardOptions.displaySaverTimeout     = DISPLAY_SAVER_TIMEOUT;
-
-	ButtonLayoutParams params = {
-		.layout = BUTTON_LAYOUT,
-		.startX = 8,
-		.startY = 28,
-		.buttonRadius = 8,
-		.buttonPadding = 2
-	};
-	boardOptions.buttonLayoutCustomOptions.params = params;
 	
-	ButtonLayoutParams paramsRight = {
-		.layoutRight = BUTTON_LAYOUT_RIGHT,
-		.startX = 8,
-		.startY = 28,
-		.buttonRadius = 8,
-		.buttonPadding = 2
-	};
-	boardOptions.buttonLayoutCustomOptions.paramsRight = paramsRight;
+	DisplayButtonLayout* layout = *(std::find_if(getDisplayButtonLayouts().begin(), getDisplayButtonLayouts().end(), [](DisplayButtonLayout* a) { return a->getId().layout == BUTTON_LAYOUT; }));
+	boardOptions.displayButtonLayoutParams = layout->getDefaultParams();
+	
+	DisplayButtonLayout* layoutRight = *(std::find_if(getDisplayButtonLayoutsRight().begin(), getDisplayButtonLayoutsRight().end(), [](DisplayButtonLayout* a) { return a->getId().layoutRight == BUTTON_LAYOUT_RIGHT; }));
+	boardOptions.displayButtonLayoutParamsRight = layout->getDefaultParams();
 
 	strncpy(boardOptions.boardVersion, GP2040VERSION, strlen(GP2040VERSION));
 	setBoardOptions(boardOptions);
@@ -245,7 +238,7 @@ void Storage::setDefaultLEDOptions()
 {
 	ledOptions.dataPin = BOARD_LEDS_PIN;
 	ledOptions.ledFormat = LED_FORMAT;
-	ledOptions.ledLayout = BUTTON_LAYOUT;
+	ledOptions.ledLayout = ButtonLayout::BUTTON_LAYOUT_STICK;
 	ledOptions.ledsPerButton = LEDS_PER_PIXEL;
 	ledOptions.brightnessMaximum = LED_BRIGHTNESS_MAXIMUM;
 	ledOptions.brightnessSteps = LED_BRIGHTNESS_STEPS;
@@ -350,12 +343,12 @@ uint8_t * Storage::GetFeatureData()
 
 int Storage::GetButtonLayout()
 {
-	return (CONFIG_MODE ? previewBoardOptions : boardOptions).buttonLayout;
+	return boardOptions.buttonLayout;
 }
 
 int Storage::GetButtonLayoutRight()
 {
-	return (CONFIG_MODE ? previewBoardOptions : boardOptions).buttonLayoutRight;
+	return boardOptions.buttonLayoutRight;
 }
 
 int Storage::GetSplashMode()
