@@ -47,13 +47,7 @@ void I2CDisplayAddon::setup() {
 	obdSetBackBuffer(&obd, ucBackBuffer);
 	clearScreen(1);
 	gamepad = Storage::getInstance().GetGamepad();
-	pGamepad = Storage::getInstance().GetProcessedGamepad();
-	for (auto layout: getDisplayButtonLayouts()) {
-		displayButtonLayoutsLeft[layout->getId().layout] = layout;
-	}
-	for (auto layout: getDisplayButtonLayoutsRight()) {
-		displayButtonLayoutsRight[layout->getId().layoutRight] = layout;
-	}
+	pGamepad = Storage::getInstance().GetProcessedGamepad();	
 }
 
 bool I2CDisplayAddon::isDisplayPowerOff()
@@ -88,6 +82,9 @@ void I2CDisplayAddon::process() {
 
 	if (!configMode && isDisplayPowerOff()) return;
 
+	int splashDuration = Storage::getInstance().GetSplashDuration();
+	splashDuration = splashDuration == 0 ? SPLASH_DURATION : splashDuration;
+
 	clearScreen(0);
 	if (configMode) {
 		gamepad->read();
@@ -112,16 +109,17 @@ void I2CDisplayAddon::process() {
 		drawText(5, 6, "B1 > Button");
 		drawText(5, 7, "B2 > Splash");
 	} else if ((configMode && displayPreviewMode == PREVIEW_MODE_SPLASH) ||
-			   (!configMode && getMillis() < 7500 && Storage::getInstance().GetSplashMode() != NOSPLASH)) {
+			   (!configMode && (splashDuration == -1 || getMillis() < splashDuration)
+			    && Storage::getInstance().GetSplashMode() != NOSPLASH)) {
 		const uint8_t* splashChoice = Storage::getInstance().getSplashImage().data;
 		drawSplashScreen(Storage::getInstance().GetSplashMode(), (uint8_t *)splashChoice, 90);
 	} else {
 		drawStatusBar(gamepad);
 
-		DisplayButtonLayout* left = displayButtonLayoutsLeft[((ButtonLayout) getBoardOptions().buttonLayout)];
+		DisplayButtonLayout* left = getDisplayButtonLayouts()[(getBoardOptions().buttonLayout)];
 		DisplayButtonLayoutParams paramsLeft = getBoardOptions().displayButtonLayoutParams;
 		left->draw(obd, gamepad, pGamepad, paramsLeft.startX, paramsLeft.startY, paramsLeft.buttonRadius, paramsLeft.buttonPadding);
-		DisplayButtonLayout* right = displayButtonLayoutsRight[((ButtonLayoutRight) getBoardOptions().buttonLayoutRight)];
+		DisplayButtonLayout* right = getDisplayButtonLayoutsRight()[(getBoardOptions().buttonLayoutRight)];
 		DisplayButtonLayoutParams paramsRight = getBoardOptions().displayButtonLayoutParamsRight;
 		right->draw(obd, gamepad, pGamepad, paramsRight.startX, paramsRight.startY, paramsRight.buttonRadius, paramsRight.buttonPadding);
 	}

@@ -197,16 +197,14 @@ std::string setDisplayOptions(BoardOptions& boardOptions)
 	boardOptions.buttonLayout      	   = doc["buttonLayout"];
 	boardOptions.buttonLayoutRight     = doc["buttonLayoutRight"];
 	boardOptions.splashMode      	   = doc["splashMode"];
-	boardOptions.splashChoice          = doc["splashChoice"];
+	boardOptions.splashDuration        = doc["splashDuration"];
 	boardOptions.displaySaverTimeout   = doc["displaySaverTimeout"];
 
-	boardOptions.buttonLayout 		 	       = doc["buttonLayout"];
 	boardOptions.displayButtonLayoutParams.startX 		 	       = doc["displayButtonLayoutParams"]["startX"];
 	boardOptions.displayButtonLayoutParams.startY 		 	       = doc["displayButtonLayoutParams"]["startY"];
 	boardOptions.displayButtonLayoutParams.buttonRadius      	   = doc["displayButtonLayoutParams"]["buttonRadius"];
 	boardOptions.displayButtonLayoutParams.buttonPadding     	   = doc["displayButtonLayoutParams"]["buttonPadding"];
 	
-	boardOptions.buttonLayoutRight 	   	   = doc["buttonLayoutRight"];
 	boardOptions.displayButtonLayoutParamsRight.startX 		 	   = doc["displayButtonLayoutParamsRight"]["startX"];
 	boardOptions.displayButtonLayoutParamsRight.startY 		 	   = doc["displayButtonLayoutParamsRight"]["startY"];
 	boardOptions.displayButtonLayoutParamsRight.buttonRadius  	   = doc["displayButtonLayoutParamsRight"]["buttonRadius"];
@@ -247,7 +245,7 @@ std::string getDisplayOptions() // Manually set Document Attributes for the disp
 	doc["buttonLayout"]  	 = boardOptions.buttonLayout;
 	doc["buttonLayoutRight"] = boardOptions.buttonLayoutRight;
 	doc["splashMode"]  	     = boardOptions.splashMode;
-	doc["splashChoice"]      = boardOptions.splashChoice;
+	doc["splashDuration"]    = boardOptions.splashDuration;
 	doc["displaySaverTimeout"] = boardOptions.displaySaverTimeout;
 
 	doc["buttonLayout"] 		 	 = boardOptions.buttonLayout;
@@ -662,13 +660,14 @@ std::string reboot()
 std::string getDisplayButtonLayoutsApi()
 {
 	DynamicJsonDocument doc(LWIP_HTTPD_POST_MAX_PAYLOAD_LEN);
-	std::vector layouts = getDisplayButtonLayouts();
+	std::map<size_t, DisplayButtonLayout*> layouts = getDisplayButtonLayouts();
 
 	auto layoutsArray = doc.createNestedArray("layouts");
-	for (auto a: layouts) {
+	for (auto const& pair: layouts) {
+		DisplayButtonLayout* a = pair.second;
 		auto o = layoutsArray.createNestedObject();
 		o["label"] = a->getName();
-		o["value"] = a->getId().layout;
+		o["value"] = pair.first;
 		o["params"]["startX"] 		 	 = a->getDefaultParams().startX;
 		o["params"]["startY"] 		 	 = a->getDefaultParams().startY;
 		o["params"]["buttonRadius"]  	 = a->getDefaultParams().buttonRadius;
@@ -681,13 +680,14 @@ std::string getDisplayButtonLayoutsApi()
 std::string getDisplayButtonLayoutsRightApi()
 {
 	DynamicJsonDocument doc(LWIP_HTTPD_POST_MAX_PAYLOAD_LEN);	
-	std::vector layoutsRight = getDisplayButtonLayoutsRight();
+	std::map<size_t, DisplayButtonLayout*> layoutsRight = getDisplayButtonLayoutsRight();
 
 	auto layoutsRightArray = doc.createNestedArray("layoutsRight");
-	for (auto a: layoutsRight) {
+	for (auto const& pair: layoutsRight) {
+		DisplayButtonLayout* a = pair.second;
 		auto o = layoutsRightArray.createNestedObject();
 		o["label"] = a->getName();
-		o["value"] = a->getId().layoutRight;
+		o["value"] = pair.first;
 		o["params"]["startX"] 		 	 = a->getDefaultParams().startX;
 		o["params"]["startY"] 		 	 = a->getDefaultParams().startY;
 		o["params"]["buttonRadius"]  	 = a->getDefaultParams().buttonRadius;

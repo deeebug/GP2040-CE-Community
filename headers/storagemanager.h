@@ -64,10 +64,11 @@ struct BoardOptions
 	uint8_t pinButtonR3;
 	uint8_t pinButtonA1;
 	uint8_t pinButtonA2;
-	ButtonLayout buttonLayout;
-	ButtonLayoutRight buttonLayoutRight;
+	size_t buttonLayout;
+	size_t buttonLayoutRight;
 	SplashMode splashMode;
 	SplashChoice splashChoice;
+	int splashDuration; // -1 = Always on
 	uint8_t i2cSDAPin;
 	uint8_t i2cSCLPin;
 	int i2cBlock;
@@ -219,6 +220,7 @@ public:
 
 	int GetSplashMode();
 	int GetSplashChoice();
+	int GetSplashDuration();
 
 private:
 	Storage() : gamepad(0) {

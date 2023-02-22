@@ -8,8 +8,8 @@ include(CMakePrintHelpers)
 # note: this must happen before project()
 include(pico_sdk_import.cmake)
 
-if (PICO_SDK_VERSION_STRING VERSION_LESS "1.4.0")
-  message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.4.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
+if (PICO_SDK_VERSION_STRING VERSION_LESS "1.5.0")
+  message(FATAL_ERROR "Raspberry Pi Pico SDK version 1.5.0 (or later) required. Your version is ${PICO_SDK_VERSION_STRING}")
 endif()
 
 project(GP2040-CE LANGUAGES C CXX ASM VERSION 0.6.1)
@@ -106,6 +106,7 @@ src/addonmanager.cpp
 src/configmanager.cpp
 src/storagemanager.cpp
 src/system.cpp
+src/hash.cpp
 src/display_button_layouts.cpp
 src/configs/webconfig.cpp
 src/addons/analog.cpp

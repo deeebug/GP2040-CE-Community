@@ -60,6 +60,10 @@
 #define DISPLAY_SAVER_TIMEOUT 0
 #endif
 
+#ifndef SPLASH_DURATION
+#define SPLASH_DURATION 7500 // Duration in milliseconds
+#endif
+
 // i2c Display Module
 #define I2CDisplayName "I2CDisplay"
 
@@ -104,8 +108,6 @@ private:
 	uint16_t prevButtonState;
 	std::unordered_map<ButtonLayout, DisplayButtonLayout*> displayButtonLayoutsLeft;
 	std::unordered_map<ButtonLayoutRight, DisplayButtonLayout*> displayButtonLayoutsRight;
-	//DisplayButtonLayout& selectedDisplayButtonLayoutLeft;
-	//DisplayButtonLayout& selectedDisplayButtonLayoutRight;
 };
 
 #endif

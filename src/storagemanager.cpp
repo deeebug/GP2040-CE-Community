@@ -6,6 +6,7 @@
 #include "storagemanager.h"
 
 #include "BoardConfig.h"
+#include "hash.h"
 #include <GamepadStorage.h>
 #include "AnimationStorage.hpp"
 #include "Effects/StaticColor.hpp"
@@ -94,10 +95,11 @@ void Storage::setDefaultBoardOptions()
 	boardOptions.pinButtonR3       = PIN_BUTTON_R3;
 	boardOptions.pinButtonA1       = PIN_BUTTON_A1;
 	boardOptions.pinButtonA2       = PIN_BUTTON_A2;
-	boardOptions.buttonLayout      = BUTTON_LAYOUT;
-	boardOptions.buttonLayoutRight = BUTTON_LAYOUT_RIGHT;
+	boardOptions.buttonLayout      = hash(BUTTON_LAYOUT);
+	boardOptions.buttonLayoutRight = hash(BUTTON_LAYOUT_RIGHT);
 	boardOptions.splashMode        = SPLASH_MODE;
 	boardOptions.splashChoice      = SPLASH_CHOICE;
+	boardOptions.splashDuration    = SPLASH_DURATION;
 	boardOptions.i2cSDAPin         = I2C_SDA_PIN;
 	boardOptions.i2cSCLPin         = I2C_SCL_PIN;
 	boardOptions.i2cBlock          = (I2C_BLOCK == i2c0) ? 0 : 1;
@@ -109,11 +111,11 @@ void Storage::setDefaultBoardOptions()
 	boardOptions.displayInvert     = DISPLAY_INVERT;
 	boardOptions.displaySaverTimeout     = DISPLAY_SAVER_TIMEOUT;
 	
-	DisplayButtonLayout* layout = *(std::find_if(getDisplayButtonLayouts().begin(), getDisplayButtonLayouts().end(), [](DisplayButtonLayout* a) { return a->getId().layout == BUTTON_LAYOUT; }));
+	DisplayButtonLayout* layout = getDisplayButtonLayouts()[boardOptions.buttonLayout];
 	boardOptions.displayButtonLayoutParams = layout->getDefaultParams();
 	
-	DisplayButtonLayout* layoutRight = *(std::find_if(getDisplayButtonLayoutsRight().begin(), getDisplayButtonLayoutsRight().end(), [](DisplayButtonLayout* a) { return a->getId().layoutRight == BUTTON_LAYOUT_RIGHT; }));
-	boardOptions.displayButtonLayoutParamsRight = layout->getDefaultParams();
+	DisplayButtonLayout* layoutRight = getDisplayButtonLayoutsRight()[boardOptions.buttonLayoutRight];
+	boardOptions.displayButtonLayoutParamsRight = layoutRight->getDefaultParams();
 
 	strncpy(boardOptions.boardVersion, GP2040VERSION, strlen(GP2040VERSION));
 	setBoardOptions(boardOptions);
@@ -343,12 +345,12 @@ uint8_t * Storage::GetFeatureData()
 
 int Storage::GetButtonLayout()
 {
-	return boardOptions.buttonLayout;
+	return (CONFIG_MODE ? previewBoardOptions : boardOptions).buttonLayout;
 }
 
 int Storage::GetButtonLayoutRight()
 {
-	return boardOptions.buttonLayoutRight;
+	return (CONFIG_MODE ? previewBoardOptions : boardOptions).buttonLayoutRight;
 }
 
 int Storage::GetSplashMode()
@@ -359,6 +361,11 @@ int Storage::GetSplashMode()
 int Storage::GetSplashChoice()
 {
 	return boardOptions.splashChoice;
+}
+
+int Storage::GetSplashDuration()
+{
+	return boardOptions.splashDuration;
 }
 
 /* Animation stuffs */
