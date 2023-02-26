@@ -108,6 +108,7 @@ src/storagemanager.cpp
 src/system.cpp
 src/hash.cpp
 src/display_button_layouts.cpp
+src/led_button_layouts.cpp
 src/configs/webconfig.cpp
 src/addons/analog.cpp
 src/addons/board_led.cpp

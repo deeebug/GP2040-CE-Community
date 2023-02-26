@@ -11,6 +11,7 @@
 #include <MPG.h>
 #include "AnimationStation.hpp"
 #include "helper.h"
+#include "led_button_layouts.h"
 
 using namespace std;
 
@@ -285,7 +286,7 @@ static map<uint32_t, RGB> themeFightboard({
 void addStaticThemes(LEDOptions options)
 {
 	// Rainbow theme on a Stickless layout should use green for up button
-	themeStaticRainbow[GAMEPAD_MASK_DU] = (options.ledLayout == BUTTON_LAYOUT_STICKLESS) ? ColorGreen : ColorOrange;
+	themeStaticRainbow[GAMEPAD_MASK_DU] = (options.ledLayout == getLEDButtonLayoutId(LEDButtonLayoutStickless::NAME)) ? ColorGreen : ColorOrange;
 
 	StaticTheme::ClearThemes();
 

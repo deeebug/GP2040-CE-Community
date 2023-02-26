@@ -191,6 +191,7 @@
 
 #define BUTTON_LAYOUT "Stick"
 #define BUTTON_LAYOUT_RIGHT "Viewlix"
+#define LED_BUTTON_LAYOUT "Stickless Layout"
 #define SPLASH_MODE NOSPLASH
 #define SPLASH_CHOICE MAIN
 #define SPLASH_DURATION 7500 // Duration in milliseconds

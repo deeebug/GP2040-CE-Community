@@ -13,6 +13,7 @@
 #include "addons/pleds.h"
 #include "themes.h"
 
+#include "led_button_layouts.h"
 #include "enums.h"
 #include "helper.h"
 
@@ -184,156 +185,9 @@ std::vector<uint8_t> * NeoPicoLEDAddon::getLEDPositions(string button, std::vect
 	Pixel(buttonPositions[BUTTON], MASK, *getLEDPositions(BUTTON, positions))
 
 /**
- * @brief Create an LED layout using a 2x4 matrix.
- */
-std::vector<std::vector<Pixel>> NeoPicoLEDAddon::generatedLEDButtons(std::vector<std::vector<uint8_t>> *positions)
-{
-	std::vector<std::vector<Pixel>> pixels =
-	{
-		{
-			PIXEL(BUTTON_LABEL_B3, GAMEPAD_MASK_B3),
-			PIXEL(BUTTON_LABEL_B1, GAMEPAD_MASK_B1),
-		},
-		{
-			PIXEL(BUTTON_LABEL_B4, GAMEPAD_MASK_B4),
-			PIXEL(BUTTON_LABEL_B2, GAMEPAD_MASK_B2),
-		},
-		{
-			PIXEL(BUTTON_LABEL_R1, GAMEPAD_MASK_R1),
-			PIXEL(BUTTON_LABEL_R2, GAMEPAD_MASK_R2),
-		},
-		{
-			PIXEL(BUTTON_LABEL_L1, GAMEPAD_MASK_L1),
-			PIXEL(BUTTON_LABEL_L2, GAMEPAD_MASK_L2),
-		},
-		{
-			PIXEL(BUTTON_LABEL_LEFT, GAMEPAD_MASK_DL),
-			PIXEL(BUTTON_LABEL_DOWN, GAMEPAD_MASK_DD),
-			PIXEL(BUTTON_LABEL_RIGHT, GAMEPAD_MASK_DR),
-			PIXEL(BUTTON_LABEL_UP, GAMEPAD_MASK_DU),
-			PIXEL(BUTTON_LABEL_S1, GAMEPAD_MASK_S1),
-			PIXEL(BUTTON_LABEL_S2, GAMEPAD_MASK_S2),
-			PIXEL(BUTTON_LABEL_L3, GAMEPAD_MASK_L3),
-			PIXEL(BUTTON_LABEL_R3, GAMEPAD_MASK_R3),
-			PIXEL(BUTTON_LABEL_A1, GAMEPAD_MASK_A1),
-			PIXEL(BUTTON_LABEL_A2, GAMEPAD_MASK_A2),
-		},
-	};
-
-	return pixels;
-}
-
-/**
- * @brief Create an LED layout using a 3x8 matrix.
- */
-std::vector<std::vector<Pixel>> NeoPicoLEDAddon::generatedLEDStickless(vector<vector<uint8_t>> *positions)
-{
-	std::vector<std::vector<Pixel>> pixels =
-	{
-		{
-			PIXEL(BUTTON_LABEL_LEFT, GAMEPAD_MASK_DL),
-			NO_PIXEL,
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_DOWN, GAMEPAD_MASK_DD),
-			NO_PIXEL,
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_RIGHT, GAMEPAD_MASK_DR),
-			NO_PIXEL,
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_UP, GAMEPAD_MASK_DU),
-			NO_PIXEL,
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_B3, GAMEPAD_MASK_B3),
-			PIXEL(BUTTON_LABEL_B1, GAMEPAD_MASK_B1),
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_B4, GAMEPAD_MASK_B4),
-			PIXEL(BUTTON_LABEL_B2, GAMEPAD_MASK_B2),
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_R1, GAMEPAD_MASK_R1),
-			PIXEL(BUTTON_LABEL_R2, GAMEPAD_MASK_R2),
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_L1, GAMEPAD_MASK_L1),
-			PIXEL(BUTTON_LABEL_L2, GAMEPAD_MASK_L2),
-			NO_PIXEL,
-		},
-		{
-			PIXEL(BUTTON_LABEL_S1, GAMEPAD_MASK_S1),
-			PIXEL(BUTTON_LABEL_S2, GAMEPAD_MASK_S2),
-			PIXEL(BUTTON_LABEL_L3, GAMEPAD_MASK_L3),
-			PIXEL(BUTTON_LABEL_R3, GAMEPAD_MASK_R3),
-			PIXEL(BUTTON_LABEL_A1, GAMEPAD_MASK_A1),
-			PIXEL(BUTTON_LABEL_A2, GAMEPAD_MASK_A2),
-		},
-	};
-
-	return pixels;
-}
-
-/**
- * @brief Create an LED layout using a 2x7 matrix.
- */
-std::vector<std::vector<Pixel>> NeoPicoLEDAddon::generatedLEDWasd(std::vector<std::vector<uint8_t>> *positions)
-{
-	std::vector<std::vector<Pixel>> pixels =
-	{
-		{
-			NO_PIXEL,
-			PIXEL(BUTTON_LABEL_LEFT, GAMEPAD_MASK_DL),
-		},
-		{
-			PIXEL(BUTTON_LABEL_UP, GAMEPAD_MASK_DU),
-			PIXEL(BUTTON_LABEL_DOWN, GAMEPAD_MASK_DD),
-		},
-		{
-			NO_PIXEL,
-			PIXEL(BUTTON_LABEL_RIGHT, GAMEPAD_MASK_DR),
-		},
-		{
-			PIXEL(BUTTON_LABEL_B3, GAMEPAD_MASK_B3),
-			PIXEL(BUTTON_LABEL_B1, GAMEPAD_MASK_B1),
-		},
-		{
-			PIXEL(BUTTON_LABEL_B4, GAMEPAD_MASK_B4),
-			PIXEL(BUTTON_LABEL_B2, GAMEPAD_MASK_B2),
-		},
-		{
-			PIXEL(BUTTON_LABEL_R1, GAMEPAD_MASK_R1),
-			PIXEL(BUTTON_LABEL_R2, GAMEPAD_MASK_R2),
-		},
-		{
-			PIXEL(BUTTON_LABEL_L1, GAMEPAD_MASK_L1),
-			PIXEL(BUTTON_LABEL_L2, GAMEPAD_MASK_L2),
-		},
-		{
-			PIXEL(BUTTON_LABEL_S1, GAMEPAD_MASK_S1),
-			PIXEL(BUTTON_LABEL_S2, GAMEPAD_MASK_S2),
-			PIXEL(BUTTON_LABEL_L3, GAMEPAD_MASK_L3),
-			PIXEL(BUTTON_LABEL_R3, GAMEPAD_MASK_R3),
-			PIXEL(BUTTON_LABEL_A1, GAMEPAD_MASK_A1),
-			PIXEL(BUTTON_LABEL_A2, GAMEPAD_MASK_A2),
-		},
-	};
-
-	return pixels;
-}
-
-/**
  * @brief Create an LED layout using a 2x7 matrix for the mirrored Fightboard.
  */
+/**
 std::vector<std::vector<Pixel>> NeoPicoLEDAddon::generatedLEDWasdFBM(std::vector<std::vector<uint8_t>> *positions)
 {
 	std::vector<std::vector<Pixel>> pixels =
@@ -378,8 +232,9 @@ std::vector<std::vector<Pixel>> NeoPicoLEDAddon::generatedLEDWasdFBM(std::vector
 
 	return pixels;
 }
+**/
 
-std::vector<std::vector<Pixel>> NeoPicoLEDAddon::createLEDLayout(ButtonLayout layout, uint8_t ledsPerPixel, uint8_t ledButtonCount)
+std::vector<std::vector<Pixel>> NeoPicoLEDAddon::createLEDLayout(LEDButtonLayout* layout, uint8_t ledsPerPixel, uint8_t ledButtonCount)
 {
 	vector<vector<uint8_t>> positions(ledButtonCount);
 	for (int i = 0; i != ledButtonCount; i++)
@@ -389,47 +244,22 @@ std::vector<std::vector<Pixel>> NeoPicoLEDAddon::createLEDLayout(ButtonLayout la
 			positions[i][l] = (i * ledsPerPixel) + l;
 	}
 
-	switch (layout)
-	{
-		case BUTTON_LAYOUT_BLANKA:
-			return generatedLEDButtons(&positions);
-		
-		case BUTTON_LAYOUT_BUTTONS_BASIC:
-			return generatedLEDButtons(&positions);
+	std::vector<std::vector<LabelMaskPair>> pairs = layout->generatedLEDButtons();
 
-		case BUTTON_LAYOUT_KEYBOARD_ANGLED:
-			return generatedLEDButtons(&positions);
-
-		case BUTTON_LAYOUT_KEYBOARDA:
-			return generatedLEDButtons(&positions);
-
-		case BUTTON_LAYOUT_DANCEPADA:
-			return generatedLEDButtons(&positions);
-
-		case BUTTON_LAYOUT_TWINSTICKA:
-			return generatedLEDButtons(&positions);
-		
-		case BUTTON_LAYOUT_ARCADE:
-			return generatedLEDButtons(&positions);
-
-		case BUTTON_LAYOUT_STICKLESS:
-			return generatedLEDStickless(&positions);
-
-		case BUTTON_LAYOUT_BUTTONS_ANGLED:
-			return generatedLEDWasd(&positions);
-
-		case BUTTON_LAYOUT_VLXA:
-			return generatedLEDButtons(&positions);
-
-		case BUTTON_LAYOUT_FIGHTBOARD_STICK:
-			return generatedLEDWasd(&positions);
-
-		case BUTTON_LAYOUT_FIGHTBOARD_MIRRORED:
-			return generatedLEDWasdFBM(&positions);
+	std::vector<std::vector<Pixel>> pixelsList(pairs.size());
+	for (std::vector<LabelMaskPair> list: pairs) {
+		std::vector<Pixel> pixels;
+		for (LabelMaskPair pair: list) {
+			if (pair.mask == 0) {
+				pixels.emplace_back(-1);
+			} else {
+				pixels.emplace_back(buttonPositions[pair.label], pair.mask, *getLEDPositions(pair.label, &positions));
+			}
+		}
+		pixelsList.push_back(pixels);
 	}
 
-	assert(false);
-	return std::vector<std::vector<Pixel>>();
+	return pixelsList;
 }
 
 uint8_t NeoPicoLEDAddon::setupButtonPositions()
@@ -468,7 +298,7 @@ void NeoPicoLEDAddon::configureLEDs()
 {
 	LEDOptions ledOptions = Storage::getInstance().getLEDOptions();
 	uint8_t buttonCount = setupButtonPositions();
-	vector<vector<Pixel>> pixels = createLEDLayout(ledOptions.ledLayout, ledOptions.ledsPerButton, buttonCount);
+	vector<vector<Pixel>> pixels = createLEDLayout(getLEDButtonLayout(ledOptions.ledLayout), ledOptions.ledsPerButton, buttonCount);
 	matrix.setup(pixels, ledOptions.ledsPerButton);
 	ledCount = matrix.getLedCount();
 	if (PLED_TYPE == PLED_TYPE_RGB && PLED_COUNT > 0)

@@ -13,6 +13,7 @@
 
 // GP2040 Includes
 #include "helper.h"
+#include "led_button_layouts.h"
 #include "gamepad.h"
 #include "gpaddon.h"
 #include "storagemanager.h"
@@ -148,8 +149,6 @@
 
 void configureAnimations(AnimationStation *as);
 AnimationHotkey animationHotkeys(Gamepad *gamepad);
-PixelMatrix createLedButtonLayout(ButtonLayout layout, int ledsPerPixel);
-PixelMatrix createLedButtonLayout(ButtonLayout layout, std::vector<uint8_t> *positions);
 
 // Neo Pixel needs to tie into PlayerLEDS led Levels
 class NeoPicoPlayerLEDs : public PlayerLEDs
@@ -178,7 +177,7 @@ private:
 	std::vector<std::vector<Pixel>> generatedLEDStickless(std::vector<std::vector<uint8_t>> *positions);
 	std::vector<std::vector<Pixel>> generatedLEDWasd(std::vector<std::vector<uint8_t>> *positions);
 	std::vector<std::vector<Pixel>> generatedLEDWasdFBM(std::vector<std::vector<uint8_t>> *positions);
-	std::vector<std::vector<Pixel>> createLEDLayout(ButtonLayout layout, uint8_t ledsPerPixel, uint8_t ledButtonCount);
+	std::vector<std::vector<Pixel>> createLEDLayout(LEDButtonLayout* layout, uint8_t ledsPerPixel, uint8_t ledButtonCount);
 	uint8_t setupButtonPositions();
 	const uint32_t intervalMS = 10;
 	absolute_time_t nextRunTime;

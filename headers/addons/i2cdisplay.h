@@ -106,8 +106,6 @@ private:
 	private:
 	DisplayPreviewMode displayPreviewMode;
 	uint16_t prevButtonState;
-	std::unordered_map<ButtonLayout, DisplayButtonLayout*> displayButtonLayoutsLeft;
-	std::unordered_map<ButtonLayoutRight, DisplayButtonLayout*> displayButtonLayoutsRight;
 };
 
 #endif

@@ -123,14 +123,11 @@ void Storage::setDefaultBoardOptions()
 
 void Storage::setBoardOptions(BoardOptions options)
 {
-	if (memcmp(&options, &boardOptions, sizeof(BoardOptions)) != 0)
-	{
 		options.checksum = CHECKSUM_MAGIC; // set checksum to magic number
 		options.checksum = CRC32::calculate(&options);
 		EEPROM.set(BOARD_STORAGE_INDEX, options);
 		EEPROM.commit();
 		memcpy(&boardOptions, &options, sizeof(BoardOptions));
-	}
 }
 
 AddonOptions Storage::getAddonOptions()
@@ -240,7 +237,7 @@ void Storage::setDefaultLEDOptions()
 {
 	ledOptions.dataPin = BOARD_LEDS_PIN;
 	ledOptions.ledFormat = LED_FORMAT;
-	ledOptions.ledLayout = ButtonLayout::BUTTON_LAYOUT_STICK;
+	ledOptions.ledLayout = hash(LED_BUTTON_LAYOUT);
 	ledOptions.ledsPerButton = LEDS_PER_PIXEL;
 	ledOptions.brightnessMaximum = LED_BRIGHTNESS_MAXIMUM;
 	ledOptions.brightnessSteps = LED_BRIGHTNESS_STEPS;

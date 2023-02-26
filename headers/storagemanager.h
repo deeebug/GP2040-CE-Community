@@ -14,6 +14,7 @@
 #include "helper.h"
 #include "gamepad.h"
 #include "display_button_layouts.h"
+#include "led_button_layouts.h"
 
 #define GAMEPAD_STORAGE_INDEX      		0    // 1024 bytes for gamepad options
 #define BOARD_STORAGE_INDEX     		1024 //  512 bytes for hardware options
@@ -23,25 +24,6 @@
 #define SPLASH_IMAGE_STORAGE_INDEX		4096 // 1032 bytes for Display Config
 
 #define CHECKSUM_MAGIC          0 	// Checksum CRC
-
-struct ButtonLayoutParams
-{
-	union {
-		ButtonLayout layout;
-		ButtonLayoutRight layoutRight;
-	};
-	int startX;
-	int startY;
-	int buttonRadius;
-	int buttonPadding;
-};
-
-struct ButtonLayoutCustomOptions
-{
-	ButtonLayoutParams params;
-	ButtonLayoutParams paramsRight;
-}; // 76 bytes
-
 
 struct BoardOptions
 {
@@ -144,7 +126,7 @@ struct LEDOptions
 	bool useUserDefinedLEDs;
 	int dataPin;
 	LEDFormat ledFormat;
-	ButtonLayout ledLayout;
+	size_t ledLayout;
 	uint8_t ledsPerButton;
 	uint8_t brightnessMaximum;
 	uint8_t brightnessSteps;
