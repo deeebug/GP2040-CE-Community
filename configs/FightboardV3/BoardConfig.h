@@ -7,7 +7,8 @@
 #define PICO_BOARD_CONFIG_H_
 
 #include <GamepadEnums.h>
-
+#include "display_button_layouts.h"
+#include "led_button_layouts.h"
 
 // This is the main pin definition section.
 // This will let you specify which GPIO pin each button is assigned too. 
@@ -189,8 +190,8 @@
 #define REVERSE_LEFT_DEFAULT 1
 #define REVERSE_RIGHT_DEFAULT 1
 
-#define BUTTON_LAYOUT BUTTON_LAYOUT_FIGHTBOARD_STICK
-#define BUTTON_LAYOUT_RIGHT BUTTON_LAYOUT_FIGHTBOARD
+#define BUTTON_LAYOUT "Fightboard"
+#define BUTTON_LAYOUT_RIGHT "Fightboard"
 #define SPLASH_MODE NOSPLASH
 #define SPLASH_CHOICE MAIN
 #define SPLASH_DURATION 7500 // Duration in milliseconds
@@ -200,6 +201,8 @@
 #define LEDS_THEME_INDEX 19
 #define LEDS_BUTTON_COLOR_INDEX 0
 #define LEDS_BRIGHTNESS 2
+
+#define LED_BUTTON_LAYOUT "Fightboard"
 
 // Board LED Add-on Setting
 // BOARD_LED_OFF  - Turns the on-board LED off
@@ -223,5 +226,23 @@
 // Extra Button Add-on setting
 #define EXTRA_BUTTON_MASK 0 // 0 means none, get other mask from GamepadState.h
 #define EXTRA_BUTTON_PIN -1
+
+class ButtonLayoutFightboardStick : public ButtonLayoutStick {
+    public:
+        ButtonLayoutFightboardStick(): ButtonLayoutStick(BUTTON_LAYOUT, DisplayButtonLayoutParams {18, 22, 8, 2}) {}
+};
+
+class ButtonLayoutFightboard : public DisplayButtonLayout {
+    public:
+        ButtonLayoutFightboard(): DisplayButtonLayout(BUTTON_LAYOUT_RIGHT, DisplayButtonLayoutParams {8, 22, 7, 3}) {}
+        void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
+};
+
+class LEDButtonLayoutFightboard : public LEDButtonLayoutWasd {
+    public:
+        LEDButtonLayoutFightboard(): LEDButtonLayout(LED_BUTTON_LAYOUT) {}
+};
+
+void initBoardConfig();
 
 #endif

@@ -10,6 +10,9 @@ struct LabelMaskPair {
     uint32_t mask;
 };
 
+const LabelMaskPair PIXEL_OFF \
+	{ .label={}, .mask=0 };
+
 class LEDButtonLayout {
     public:
         LEDButtonLayout(std::string name): name(name) {};
@@ -43,5 +46,6 @@ class LEDButtonLayoutWasd : public LEDButtonLayout {
 std::map<size_t, LEDButtonLayout*> getLEDButtonLayouts();
 LEDButtonLayout* getLEDButtonLayout(size_t layoutId);
 size_t getLEDButtonLayoutId(std::string name);
+void registerLEDButtonLayout(LEDButtonLayout* layout);
 
 #endif

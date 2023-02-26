@@ -6,6 +6,7 @@
 #include "addonmanager.h"
 #include "configmanager.h" // Global Managers
 #include "storagemanager.h"
+#include "BoardConfig.h"
 
 #include "addons/analog.h" // Inputs for Core0
 #include "addons/bootsel_button.h"
@@ -39,6 +40,8 @@ GP2040::GP2040() : nextRuntime(0) {
 GP2040::~GP2040() {}
 
 void GP2040::setup() {
+  initBoardConfig();
+
   // Setup Gamepad and Gamepad Storage
   Gamepad *gamepad = Storage::getInstance().GetGamepad();
   gamepad->setup();

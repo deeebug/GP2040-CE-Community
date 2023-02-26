@@ -214,28 +214,6 @@ void ButtonLayoutVLXA::draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, in
     }
 }
 
-void ButtonLayoutFightboardMirrored::draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding) {
-    const int buttonMargin = buttonPadding + (buttonRadius * 2);
-    const int leftMargin = startX + buttonPadding + buttonRadius;
-
-    obdPreciseEllipse(&obd, leftMargin, startY - (buttonMargin / 4), buttonRadius, buttonRadius, 1, pGamepad->pressedL1());
-    obdPreciseEllipse(&obd, leftMargin + buttonMargin, startY - (buttonMargin / 4), buttonRadius, buttonRadius, 1, pGamepad->pressedR1());
-    obdPreciseEllipse(&obd, leftMargin + (buttonMargin*2), startY - (buttonMargin / 4), buttonRadius, buttonRadius, 1, pGamepad->pressedB4());
-    obdPreciseEllipse(&obd, leftMargin + (buttonMargin*3), startY * 1.25, buttonRadius, buttonRadius, 1, pGamepad->pressedB3());
-
-    obdPreciseEllipse(&obd, leftMargin, startY + buttonMargin - (buttonMargin / 4), buttonRadius, buttonRadius, 1, pGamepad->pressedL2());
-    obdPreciseEllipse(&obd, leftMargin + buttonMargin, startY + buttonMargin - (buttonMargin / 4), buttonRadius, buttonRadius, 1, pGamepad->pressedR2());
-    obdPreciseEllipse(&obd, leftMargin + (buttonMargin*2), startY + buttonMargin - (buttonMargin / 4), buttonRadius, buttonRadius, 1, pGamepad->pressedB2());
-    obdPreciseEllipse(&obd, leftMargin + (buttonMargin*3), startY + buttonMargin * 1.25, buttonRadius, buttonRadius, 1, pGamepad->pressedB1());
-
-    // Extra buttons
-    obdPreciseEllipse(&obd, startX + buttonMargin * 0.5, startY + (buttonMargin * 1.5), 3, 3, 1, pGamepad->pressedL3());
-    obdPreciseEllipse(&obd, startX + buttonMargin * 1.0625, startY + (buttonMargin * 1.5), 3, 3, 1, pGamepad->pressedS1());
-    obdPreciseEllipse(&obd, startX + buttonMargin * 1.625, startY + (buttonMargin * 1.5), 3, 3, 1, pGamepad->pressedA1());
-    obdPreciseEllipse(&obd, startX + buttonMargin * 2.125+0.0625, startY + (buttonMargin * 1.5), 3, 3, 1, pGamepad->pressedS2());
-    obdPreciseEllipse(&obd, startX + buttonMargin * 2.75, startY + (buttonMargin * 1.5), 3, 3, 1, pGamepad->pressedR3());
-        }
-
 /**
  * RIGHT layouts
 */
@@ -450,36 +428,6 @@ void ButtonLayoutVLXB::draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, in
     obdPreciseEllipse(&obd, startX + (buttonMargin * 7.4) - (buttonMargin / 3.5), startY + buttonMargin - (buttonMargin / 1.5), buttonRadius *.8, buttonRadius * .8, 1, pGamepad->pressedS2());
 }
 
-void ButtonLayoutFightboard::draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding) {
-    const int buttonMargin = buttonPadding + (buttonRadius * 2);
-    // Stick
-    obdPreciseEllipse(&obd, startX + (buttonMargin / 2), startY + (buttonMargin / 2), buttonRadius * 1.25, buttonRadius * 1.25, 1, 0);
-    
-    if (pressedUp(gamepad, pGamepad)) {
-        if (pressedLeft(gamepad, pGamepad)) {
-            obdPreciseEllipse(&obd, startX + (buttonMargin / 5), startY + (buttonMargin / 5), buttonRadius, buttonRadius, 1, 1);
-        } else if (pressedRight(gamepad, pGamepad)) {
-            obdPreciseEllipse(&obd, startX + (buttonMargin * 0.875), startY + (buttonMargin / 5), buttonRadius, buttonRadius, 1, 1);
-        } else {
-            obdPreciseEllipse(&obd, startX + (buttonMargin / 2), startY, buttonRadius, buttonRadius, 1, 1);
-        }
-    } else if (pressedDown(gamepad, pGamepad)) {
-        if (pressedLeft(gamepad, pGamepad)) {
-            obdPreciseEllipse(&obd, startX + (buttonMargin / 5), startY + (buttonMargin * 0.875), buttonRadius, buttonRadius, 1, 1);
-        } else if (pressedRight(gamepad, pGamepad)) {
-            obdPreciseEllipse(&obd, startX + (buttonMargin * 0.875), startY + (buttonMargin * 0.875), buttonRadius, buttonRadius, 1, 1);
-        } else {
-            obdPreciseEllipse(&obd, startX + buttonMargin / 2, startY + buttonMargin, buttonRadius, buttonRadius, 1, 1);
-        }
-    } else if (pressedLeft(gamepad, pGamepad)) {
-        obdPreciseEllipse(&obd, startX, startY + buttonMargin / 2, buttonRadius, buttonRadius, 1, 1);
-    } else if (pressedRight(gamepad, pGamepad)) {
-        obdPreciseEllipse(&obd, startX + buttonMargin, startY + buttonMargin / 2, buttonRadius, buttonRadius, 1, 1);
-    } else {
-        obdPreciseEllipse(&obd, startX + buttonMargin / 2, startY + buttonMargin / 2, buttonRadius, buttonRadius, 1, 1);
-    }
-}
-
 std::map<size_t, DisplayButtonLayout*> LAYOUTS {
     {  hash(ButtonLayoutStick::NAME), new ButtonLayoutStick() },
     {  hash(ButtonLayoutStickless::NAME), new ButtonLayoutStickless() },
@@ -491,8 +439,6 @@ std::map<size_t, DisplayButtonLayout*> LAYOUTS {
     {  hash(ButtonLayoutTwinstickA::NAME), new ButtonLayoutTwinstickA() },
     {  hash(ButtonLayoutBlankA::NAME), new ButtonLayoutBlankA() },
     {  hash(ButtonLayoutVLXA::NAME), new ButtonLayoutVLXA() },
-    {  hash(ButtonLayoutFightboardStick::NAME), new ButtonLayoutFightboardStick() },
-    {  hash(ButtonLayoutFightboardMirrored::NAME), new ButtonLayoutFightboardMirrored() }
 };
 
 std::map<size_t, DisplayButtonLayout*> getDisplayButtonLayouts() {
@@ -514,10 +460,16 @@ std::map<size_t, DisplayButtonLayout*> LAYOUTS_RIGHT {
     {  hash(ButtonLayoutTwinstickB::NAME), new ButtonLayoutTwinstickB() },
     {  hash(ButtonLayoutBlankB::NAME), new ButtonLayoutBlankB() },
     {  hash(ButtonLayoutVLXB::NAME), new ButtonLayoutVLXB() },
-    {  hash(ButtonLayoutFightboardStickMirrored::NAME), new ButtonLayoutFightboardStickMirrored() },
-    {  hash(ButtonLayoutFightboard::NAME), new ButtonLayoutFightboard() }
 };
 
 std::map<size_t, DisplayButtonLayout*> getDisplayButtonLayoutsRight() {
     return LAYOUTS_RIGHT;
+}
+
+void registerDisplayButtonLayout(DisplayButtonLayout* layout) {
+    LAYOUTS.emplace(hash(layout->getName()), layout);
+}
+
+void registerDisplayButtonLayoutRight(DisplayButtonLayout* layout) {
+    LAYOUTS_RIGHT.emplace(hash(layout->getName()), layout);
 }

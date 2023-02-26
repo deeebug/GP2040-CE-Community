@@ -98,6 +98,7 @@ add_subdirectory(lib)
 add_subdirectory(MPG)
 
 add_executable(${PROJECT_NAME}
+configs/${GP2040_BOARDCONFIG}/BoardConfig.cpp
 src/main.cpp
 src/gp2040.cpp
 src/gp2040aux.cpp

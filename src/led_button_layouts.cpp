@@ -3,9 +3,6 @@
 #include "helper.h"
 #include "hash.h"
 
-const LabelMaskPair PIXEL_OFF \
-	{ .label={}, .mask=0 };
-
 std::vector<std::vector<LabelMaskPair>> LEDButtonLayoutButtons::generatedLEDButtons() {
 	std::vector<std::vector<LabelMaskPair>> pixels =
 	{
@@ -158,4 +155,8 @@ LEDButtonLayout* getLEDButtonLayout(size_t layoutId) {
 
 size_t getLEDButtonLayoutId(std::string name) {
     return hash(name);
+}
+
+void registerLEDButtonLayout(LEDButtonLayout* layout) {
+    LED_BUTTON_LAYOUTS.emplace(hash(layout->getName()), layout);
 }

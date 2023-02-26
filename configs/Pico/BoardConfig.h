@@ -93,7 +93,6 @@
 #define LEDS_BUTTON_R2   10
 #define LEDS_BUTTON_L2   11
 
-
 // This is the Player LED section.  
 // In this section you can specify if Player LEDs will be active, and, if active, which pins will be used for them.
 // The defualt is `PLED_TYPE_NONE` which will turn the Player LEDs off.
@@ -109,7 +108,6 @@
 #define PLED2_PIN -1
 #define PLED3_PIN -1
 #define PLED4_PIN -1
-
 
 // This is the Analog section.
 // In this section you can specify if Analog is enabled, and, if endabled, which pins will be used for it.
@@ -230,3 +228,5 @@
 #define EXTRA_BUTTON_PIN -1
 
 #endif
+
+void initBoardConfig();
