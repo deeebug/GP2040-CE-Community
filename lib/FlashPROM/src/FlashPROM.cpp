@@ -27,12 +27,25 @@ int64_t writeToFlash(alarm_id_t id, void *flashCache)
 	return 0;
 }
 
-void FlashPROM::start()
+void FlashPROM::start(bool migrate)
 {
 	if (flashLock == nullptr)
 		flashLock = spin_lock_instance(spin_lock_claim_unused(true));
 
-	memcpy(cache, reinterpret_cast<uint8_t *>(EEPROM_ADDRESS_START), EEPROM_SIZE_BYTES);
+	if (migrate) {
+		// Copy old data
+		uint8_t tempCache[OLD_EEPROM_SIZE_BYTES];
+		memcpy(tempCache, reinterpret_cast<uint8_t *>(OLD_EEPROM_ADDRESS_START), OLD_EEPROM_SIZE_BYTES);
+
+		// Clear flash memory
+		this->reset();
+
+		// Copy and restore old data
+		memcpy(cache, tempCache, OLD_EEPROM_SIZE_BYTES);
+		this->commit();
+	} else {
+		memcpy(cache, reinterpret_cast<uint8_t *>(EEPROM_ADDRESS_START), EEPROM_SIZE_BYTES);
+	}
 
 	// When flash is new/reset, all bits are set to 1.
 	// If all bits from the FlashPROM section are 1's then set to 0's.
@@ -65,4 +78,10 @@ void FlashPROM::reset()
 {
 	memset(cache, 0, EEPROM_SIZE_BYTES);
 	commit();
+}
+
+void FlashPROM::getOldVersionString(char* buffer, size_t offset, size_t length) {
+		uint8_t tempCache[OLD_EEPROM_SIZE_BYTES];
+		memcpy(tempCache, reinterpret_cast<uint8_t *>(OLD_EEPROM_ADDRESS_START), OLD_EEPROM_SIZE_BYTES);
+		strncpy(buffer, (char*) tempCache + offset, length);
 }

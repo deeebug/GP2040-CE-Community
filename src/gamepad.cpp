@@ -122,7 +122,7 @@ void Gamepad::read()
 /* Gamepad stuffs */
 void GamepadStorage::start()
 {
-	EEPROM.start();
+	// no-op
 }
 
 void GamepadStorage::save()

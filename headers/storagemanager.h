@@ -172,6 +172,7 @@ struct LEDOptions
 // Storage manager for board, LED options, and thread-safe settings
 class Storage {
 public:
+	char oldVersion[32];
 	Storage(Storage const&) = delete;
 	void operator=(Storage const&)  = delete;
 	static Storage& getInstance() // Thread-safe storage ensures cross-thread talk
@@ -222,7 +223,11 @@ public:
 
 private:
 	Storage() : gamepad(0) {
-		EEPROM.start(); // init EEPROM
+		size_t offset = BOARD_STORAGE_INDEX + 76; // offset position of string field
+												  // in old BoardOptions struct
+		// char* oldBoardVersion = EEPROM.getOldVersionString(offset);
+		EEPROM.getOldVersionString(oldVersion, offset, sizeof(char) * 32);
+		EEPROM.start(strcmp(oldVersion, OLD_GP2040VERSION) == 0); // init EEPROM
 		initBoardOptions();
 		initAddonOptions();
 		initLEDOptions();

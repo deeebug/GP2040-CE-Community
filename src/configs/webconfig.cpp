@@ -618,6 +618,7 @@ std::string getFirmwareVersion()
 {
 	DynamicJsonDocument doc(LWIP_HTTPD_POST_MAX_PAYLOAD_LEN);
 	doc["version"] = GP2040VERSION;
+	doc["oldVersion"] = Storage::getInstance().oldVersion;
 
 	return serialize_json(doc);
 }
