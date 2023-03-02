@@ -43,7 +43,7 @@ void GP2040::setup() {
 	Gamepad * gamepad = Storage::getInstance().GetGamepad();
 	gamepad->setup();
 
-	const BootAction bootAction = getBootAction();
+	const BootAction bootAction = BootAction::ENTER_WEBCONFIG_MODE; // forced webconfig, ignored getBootAction();
 	switch (bootAction) {
 		case BootAction::ENTER_WEBCONFIG_MODE:
 			{
