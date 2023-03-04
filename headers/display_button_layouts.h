@@ -103,6 +103,18 @@ class ButtonLayoutVLXA : public DisplayButtonLayout {
         void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
 };
 
+class ButtonLayoutFightboardStick : public ButtonLayoutStick {
+    public:
+        static constexpr const char* const NAME = "Fightboard";
+        ButtonLayoutFightboardStick(): ButtonLayoutStick(NAME, DisplayButtonLayoutParams {18, 22, 8, 2}) {}
+};
+
+class ButtonLayoutFightboardStickMirrored : public ButtonLayoutStick {
+    public:
+        static constexpr const char* const NAME = "Fightboard Mirrored";
+        ButtonLayoutFightboardStickMirrored(): ButtonLayoutStick(NAME, DisplayButtonLayoutParams {90, 22, 8, 2}) {}
+};
+
 /**
  * RIGHT layouts
 */
@@ -205,8 +217,21 @@ class ButtonLayoutVLXB : public DisplayButtonLayout {
         void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
 };
 
+class ButtonLayoutFightboard : public DisplayButtonLayout {
+    public:
+        static constexpr const char* const NAME = "Fightboard";
+        ButtonLayoutFightboard(): DisplayButtonLayout(NAME, DisplayButtonLayoutParams {8, 22, 7, 3}) {}
+        void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
+};
+
+class ButtonLayoutFightboardMirrored : public DisplayButtonLayout {
+    public:
+        static constexpr const char* const NAME = "Fightboard Mirrored";
+        ButtonLayoutFightboardMirrored(): DisplayButtonLayout(NAME, DisplayButtonLayoutParams {0, 22, 7, 2}) {}
+        void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
+};
+
 std::map<size_t, DisplayButtonLayout*> getDisplayButtonLayouts();
 std::map<size_t, DisplayButtonLayout*> getDisplayButtonLayoutsRight();
-void registerDisplayButtonLayout(DisplayButtonLayout* layout);
-void registerDisplayButtonLayoutRight(DisplayButtonLayout* layout);
+
 #endif

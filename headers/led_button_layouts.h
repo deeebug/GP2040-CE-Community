@@ -46,6 +46,5 @@ class LEDButtonLayoutWasd : public LEDButtonLayout {
 std::map<size_t, LEDButtonLayout*> getLEDButtonLayouts();
 LEDButtonLayout* getLEDButtonLayout(size_t layoutId);
 size_t getLEDButtonLayoutId(std::string name);
-void registerLEDButtonLayout(LEDButtonLayout* layout);
 
 #endif

@@ -227,23 +227,4 @@
 #define EXTRA_BUTTON_MASK 0 // 0 means none, get other mask from GamepadState.h
 #define EXTRA_BUTTON_PIN -1
 
-class ButtonLayoutFightboardStickMirrored : public ButtonLayoutStick {
-    public:
-        ButtonLayoutFightboardStickMirrored(): ButtonLayoutStick(BUTTON_LAYOUT, DisplayButtonLayoutParams {90, 22, 8, 2}) {}
-};
-
-class ButtonLayoutFightboardMirrored : public DisplayButtonLayout {
-    public:
-        ButtonLayoutFightboardMirrored(): DisplayButtonLayout(BUTTON_LAYOUT_RIGHT, DisplayButtonLayoutParams {0, 22, 7, 2}) {}
-        void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
-};
-
-class LEDButtonLayoutWasdFBM : public LEDButtonLayout {
-    public:
-        LEDButtonLayoutWasdFBM(): LEDButtonLayout(LED_BUTTON_LAYOUT) {}
-        std::vector<std::vector<LabelMaskPair>> generatedLEDButtons();
-};
-
-void initBoardConfig();
-
 #endif

@@ -228,5 +228,3 @@
 #define EXTRA_BUTTON_PIN -1
 
 #endif
-
-void initBoardConfig();

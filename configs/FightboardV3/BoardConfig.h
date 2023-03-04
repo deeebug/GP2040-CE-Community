@@ -227,22 +227,4 @@
 #define EXTRA_BUTTON_MASK 0 // 0 means none, get other mask from GamepadState.h
 #define EXTRA_BUTTON_PIN -1
 
-class ButtonLayoutFightboardStick : public ButtonLayoutStick {
-    public:
-        ButtonLayoutFightboardStick(): ButtonLayoutStick(BUTTON_LAYOUT, DisplayButtonLayoutParams {18, 22, 8, 2}) {}
-};
-
-class ButtonLayoutFightboard : public DisplayButtonLayout {
-    public:
-        ButtonLayoutFightboard(): DisplayButtonLayout(BUTTON_LAYOUT_RIGHT, DisplayButtonLayoutParams {8, 22, 7, 3}) {}
-        void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
-};
-
-class LEDButtonLayoutFightboard : public LEDButtonLayoutWasd {
-    public:
-        LEDButtonLayoutFightboard(): LEDButtonLayout(LED_BUTTON_LAYOUT) {}
-};
-
-void initBoardConfig();
-
 #endif

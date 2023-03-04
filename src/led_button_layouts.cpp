@@ -156,7 +156,3 @@ LEDButtonLayout* getLEDButtonLayout(size_t layoutId) {
 size_t getLEDButtonLayoutId(std::string name) {
     return hash(name);
 }
-
-void registerLEDButtonLayout(LEDButtonLayout* layout) {
-    LED_BUTTON_LAYOUTS.emplace(hash(layout->getName()), layout);
-}
