@@ -46,52 +46,52 @@ void GP2040::setup() {
 
   const BootAction bootAction = getBootAction();
   switch (bootAction) {
-  case BootAction::ENTER_WEBCONFIG_MODE: {
-    Storage::getInstance().SetConfigMode(true);
-    initialize_driver(INPUT_MODE_CONFIG);
-    ConfigManager::getInstance().setup(CONFIG_TYPE_WEB);
-    break;
-  }
-
-  case BootAction::ENTER_USB_MODE: {
-    reset_usb_boot(0, 0);
-    break;
-  }
-
-  case BootAction::SET_INPUT_MODE_HID:
-  case BootAction::SET_INPUT_MODE_SWITCH:
-  case BootAction::SET_INPUT_MODE_XINPUT:
-  case BootAction::NONE: {
-    InputMode inputMode = gamepad->options.inputMode;
-    if (bootAction == BootAction::SET_INPUT_MODE_HID) {
-      inputMode = INPUT_MODE_HID;
-    } else if (bootAction == BootAction::SET_INPUT_MODE_SWITCH) {
-      inputMode = INPUT_MODE_SWITCH;
-    } else if (bootAction == BootAction::SET_INPUT_MODE_XINPUT) {
-      inputMode = INPUT_MODE_XINPUT;
+    case BootAction::ENTER_WEBCONFIG_MODE: {
+      Storage::getInstance().SetConfigMode(true);
+      initialize_driver(INPUT_MODE_CONFIG);
+      ConfigManager::getInstance().setup(CONFIG_TYPE_WEB);
+      break;
     }
 
-    if (inputMode != gamepad->options.inputMode) {
-      // Save the changed input mode
-      gamepad->options.inputMode = inputMode;
-      gamepad->save();
+    case BootAction::ENTER_USB_MODE: {
+      reset_usb_boot(0, 0);
+      break;
     }
 
-    initialize_driver(inputMode);
-    break;
-  }
+    case BootAction::SET_INPUT_MODE_HID:
+    case BootAction::SET_INPUT_MODE_SWITCH:
+    case BootAction::SET_INPUT_MODE_XINPUT:
+    case BootAction::NONE: {
+      InputMode inputMode = gamepad->options.inputMode;
+      if (bootAction == BootAction::SET_INPUT_MODE_HID) {
+        inputMode = INPUT_MODE_HID;
+      } else if (bootAction == BootAction::SET_INPUT_MODE_SWITCH) {
+        inputMode = INPUT_MODE_SWITCH;
+      } else if (bootAction == BootAction::SET_INPUT_MODE_XINPUT) {
+        inputMode = INPUT_MODE_XINPUT;
+      }
+
+      if (inputMode != gamepad->options.inputMode) {
+        // Save the changed input mode
+        gamepad->options.inputMode = inputMode;
+        gamepad->save();
+      }
+
+      initialize_driver(inputMode);
+      break;
+    }
   }
 
-  // Setup Add-ons
-  addons.LoadAddon(new AnalogInput(), CORE0_INPUT);
-  addons.LoadAddon(new BootselButtonAddon(), CORE0_INPUT);
-  addons.LoadAddon(new DualDirectionalInput(), CORE0_INPUT);
-  addons.LoadAddon(new ExtraButtonAddon(), CORE0_INPUT);
-  addons.LoadAddon(new I2CAnalog1219Input(), CORE0_INPUT);
-  addons.LoadAddon(new JSliderInput(), CORE0_INPUT);
-  addons.LoadAddon(new ReverseInput(), CORE0_INPUT);
-  addons.LoadAddon(new TurboInput(), CORE0_INPUT);
-  addons.LoadAddon(new PlayerNumAddon(), CORE0_USBREPORT);
+    // Setup Add-ons
+    addons.LoadAddon(new AnalogInput(), CORE0_INPUT);
+    addons.LoadAddon(new BootselButtonAddon(), CORE0_INPUT);
+    addons.LoadAddon(new DualDirectionalInput(), CORE0_INPUT);
+  	addons.LoadAddon(new ExtraButtonAddon(), CORE0_INPUT);
+    addons.LoadAddon(new I2CAnalog1219Input(), CORE0_INPUT);
+    addons.LoadAddon(new JSliderInput(), CORE0_INPUT);
+    addons.LoadAddon(new ReverseInput(), CORE0_INPUT);
+    addons.LoadAddon(new TurboInput(), CORE0_INPUT);
+    addons.LoadAddon(new PlayerNumAddon(), CORE0_USBREPORT);
 }
 
 void GP2040::run() {

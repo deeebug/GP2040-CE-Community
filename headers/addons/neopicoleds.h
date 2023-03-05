@@ -27,8 +27,8 @@
 #define BOARD_LEDS_PIN -1
 #endif
 
-#ifndef BUTTON_LAYOUT
-#define BUTTON_LAYOUT BUTTON_LAYOUT_ARCADE
+#ifndef LED_BUTTON_LAYOUT
+#define LED_BUTTON_LAYOUT LEDButtonLayoutButtons::NAME
 #endif
 
 #ifndef LED_FORMAT

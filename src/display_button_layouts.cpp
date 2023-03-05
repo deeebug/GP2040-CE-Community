@@ -233,7 +233,7 @@ void ButtonLayoutArcade::draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, 
     obdPreciseEllipse(&obd, startX + buttonMargin * 5.875, startY + buttonMargin, buttonRadius, buttonRadius, 1, pGamepad->pressedL2());
 }
 
-void ButtonLayoutSticklessb::draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding) {
+void ButtonLayoutSticklessB::draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding) {
     const int buttonMargin = buttonPadding + (buttonRadius * 2);
 
     // 8-button
@@ -492,7 +492,7 @@ std::map<size_t, DisplayButtonLayout*> getDisplayButtonLayouts() {
 
 std::map<size_t, DisplayButtonLayout*> LAYOUTS_RIGHT {
     {  hash(ButtonLayoutArcade::NAME), new ButtonLayoutArcade() },
-    {  hash(ButtonLayoutSticklessb::NAME), new ButtonLayoutSticklessb() },
+    {  hash(ButtonLayoutSticklessB::NAME), new ButtonLayoutSticklessB() },
     {  hash(ButtonLayoutButtonsAngledB::NAME), new ButtonLayoutButtonsAngledB() },
     {  hash(ButtonLayoutVewlix::NAME), new ButtonLayoutVewlix() },
     {  hash(ButtonLayoutVewlix7::NAME), new ButtonLayoutVewlix7() },

@@ -56,6 +56,14 @@
 #define DISPLAY_USEWIRE 1
 #endif
 
+#ifndef BUTTON_LAYOUT
+#define BUTTON_LAYOUT ButtonLayoutStick::NAME
+#endif
+
+#ifndef BUTTON_LAYOUT_RIGHT
+#define BUTTON_LAYOUT_RIGHT ButtonLayoutVewlix::NAME
+#endif
+
 #ifndef DISPLAY_SAVER_TIMEOUT
 #define DISPLAY_SAVER_TIMEOUT 0
 #endif
@@ -66,12 +74,6 @@
 
 // i2c Display Module
 #define I2CDisplayName "I2CDisplay"
-
-enum DisplayPreviewMode {
-	PREVIEW_MODE_NONE,
-	PREVIEW_MODE_BUTTONS,
-	PREVIEW_MODE_SPLASH
-};
 
 // i2C OLED Display
 class I2CDisplayAddon : public GPAddon
@@ -103,8 +105,16 @@ private:
 	std::string statusBar;
 	Gamepad* gamepad;
 	Gamepad* pGamepad;
-	private:
-	DisplayPreviewMode displayPreviewMode;
+	bool configMode;
+
+	enum DisplayMode {
+		CONFIG_INSTRUCTION,
+		BUTTONS,
+		SPLASH
+	};
+
+	DisplayMode getDisplayMode();
+	DisplayMode prevDisplayMode;
 	uint16_t prevButtonState;
 };
 

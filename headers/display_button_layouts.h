@@ -126,10 +126,10 @@ class ButtonLayoutArcade : public DisplayButtonLayout {
         void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
 };
 
-class ButtonLayoutSticklessb : public DisplayButtonLayout {
+class ButtonLayoutSticklessB : public DisplayButtonLayout {
     public:
         static constexpr const char* const NAME = "Stickless";
-        ButtonLayoutSticklessb(): DisplayButtonLayout(NAME, DisplayButtonLayoutParams {8, 20, 8, 2}) {}
+        ButtonLayoutSticklessB(): DisplayButtonLayout(NAME, DisplayButtonLayoutParams {8, 20, 8, 2}) {}
         void draw(OBDISP& obd, Gamepad* gamepad, Gamepad* pGamepad, int startX, int startY, int buttonRadius, int buttonPadding);
 };
 

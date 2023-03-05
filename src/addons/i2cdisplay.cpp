@@ -18,9 +18,8 @@ bool I2CDisplayAddon::available() {
 }
 
 void I2CDisplayAddon::setup() {
-	displayPreviewMode = PREVIEW_MODE_NONE;
-	prevButtonState = 0;
 	BoardOptions boardOptions = getBoardOptions();
+
 	obdI2CInit(&obd,
 	    boardOptions.displaySize,
 		boardOptions.displayI2CAddress,
@@ -32,22 +31,24 @@ void I2CDisplayAddon::setup() {
 		boardOptions.i2cBlock == 0 ? i2c0 : i2c1,
 		-1,
 		boardOptions.i2cSpeed);
+		
 	const int detectedDisplay = initDisplay(0);
 	if (isSH1106(detectedDisplay)) {
 		// The display is actually a SH1106 that was misdetected as a SSD1306 by OneBitDisplay.
 		// Reinitialize as SH1106.
 		initDisplay(OLED_132x64);
 	}
- 
-	displayPreviewMode = PREVIEW_MODE_NONE;
-	prevButtonState = 0;
-	displaySaverTimeout = displaySaverTimer = boardOptions.displaySaverTimeout * 60000; // minute to ms
 	
 	obdSetContrast(&obd, 0xFF);
 	obdSetBackBuffer(&obd, ucBackBuffer);
 	clearScreen(1);
 	gamepad = Storage::getInstance().GetGamepad();
-	pGamepad = Storage::getInstance().GetProcessedGamepad();	
+	pGamepad = Storage::getInstance().GetProcessedGamepad();
+
+	prevButtonState = 0;
+	displaySaverTimer = boardOptions.displaySaverTimeout;
+	displaySaverTimeout = displaySaverTimer;
+	configMode = Storage::getInstance().GetConfigMode();
 }
 
 bool I2CDisplayAddon::isDisplayPowerOff()
@@ -78,57 +79,79 @@ void I2CDisplayAddon::setDisplayPower(uint8_t status)
 }
 
 void I2CDisplayAddon::process() {
-	bool configMode = Storage::getInstance().GetConfigMode();
-
 	if (!configMode && isDisplayPowerOff()) return;
 
-	int splashDuration = Storage::getInstance().GetSplashDuration();
-	splashDuration = splashDuration == 0 ? SPLASH_DURATION : splashDuration;
-
 	clearScreen(0);
-	if (configMode) {
-		gamepad->read();
-		uint16_t buttonState = gamepad->state.buttons;
-		if (prevButtonState && !buttonState) {
-				if (prevButtonState == GAMEPAD_MASK_B1)
-					displayPreviewMode = displayPreviewMode == PREVIEW_MODE_BUTTONS ? PREVIEW_MODE_NONE : PREVIEW_MODE_BUTTONS;
-				else if (prevButtonState == GAMEPAD_MASK_B2)
-					displayPreviewMode = displayPreviewMode == PREVIEW_MODE_SPLASH ? PREVIEW_MODE_NONE : PREVIEW_MODE_SPLASH;
-				else
-					displayPreviewMode = PREVIEW_MODE_NONE;
-		}
-		prevButtonState = buttonState;
-	}
 
-	if (configMode && displayPreviewMode == PREVIEW_MODE_NONE) {
-		drawStatusBar(gamepad);
-		drawText(0, 2, "[Web Config Mode]");
-		drawText(0, 3, std::string("GP2040-CE : ") + std::string(GP2040VERSION));
-		drawText(0, 4, "[http://192.168.7.1]");
-		drawText(0, 5, "Preview:");
-		drawText(5, 6, "B1 > Button");
-		drawText(5, 7, "B2 > Splash");
-	} else if ((configMode && displayPreviewMode == PREVIEW_MODE_SPLASH) ||
-			   (!configMode && (splashDuration == -1 || getMillis() < splashDuration)
-			    && Storage::getInstance().GetSplashMode() != NOSPLASH)) {
-		const uint8_t* splashChoice = Storage::getInstance().getSplashImage().data;
-		drawSplashScreen(Storage::getInstance().GetSplashMode(), (uint8_t *)splashChoice, 90);
-	} else {
-		drawStatusBar(gamepad);
+	switch (getDisplayMode()) {
+		case I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION:
+			drawStatusBar(gamepad);
+			drawText(0, 2, "[Web Config Mode]");
+			drawText(0, 3, std::string("GP2040-CE : ") + std::string(GP2040VERSION));
+			drawText(0, 4, "[http://192.168.7.1]");
+			drawText(0, 5, "Preview:");
+			drawText(5, 6, "B1 > Button");
+			drawText(5, 7, "B2 > Splash");
+			break;
+		case I2CDisplayAddon::DisplayMode::SPLASH:
+			if (getBoardOptions().splashMode == NOSPLASH) {
+				drawText(0, 4, " Splash NOT enabled.");
+				break;
+			}
+			drawSplashScreen(getBoardOptions().splashMode, (uint8_t*) Storage::getInstance().getSplashImage().data, 90);
+			break;
+		case I2CDisplayAddon::DisplayMode::BUTTONS:
+			drawStatusBar(gamepad);
+			BoardOptions boardOptions = getBoardOptions();
 
-		DisplayButtonLayout* left = getDisplayButtonLayouts()[(getBoardOptions().buttonLayout)];
-		DisplayButtonLayoutParams paramsLeft = getBoardOptions().displayButtonLayoutParams;
-		left->draw(obd, gamepad, pGamepad, paramsLeft.startX, paramsLeft.startY, paramsLeft.buttonRadius, paramsLeft.buttonPadding);
-		DisplayButtonLayout* right = getDisplayButtonLayoutsRight()[(getBoardOptions().buttonLayoutRight)];
-		DisplayButtonLayoutParams paramsRight = getBoardOptions().displayButtonLayoutParamsRight;
-		right->draw(obd, gamepad, pGamepad, paramsRight.startX, paramsRight.startY, paramsRight.buttonRadius, paramsRight.buttonPadding);
+			DisplayButtonLayout* left = getDisplayButtonLayouts()[(boardOptions.buttonLayout)];
+			DisplayButtonLayoutParams paramsLeft = boardOptions.displayButtonLayoutParams;
+			left->draw(obd, gamepad, pGamepad, paramsLeft.startX, paramsLeft.startY, paramsLeft.buttonRadius, paramsLeft.buttonPadding);
+
+			DisplayButtonLayout* right = getDisplayButtonLayoutsRight()[(boardOptions.buttonLayoutRight)];
+			DisplayButtonLayoutParams paramsRight = boardOptions.displayButtonLayoutParamsRight;
+			right->draw(obd, gamepad, pGamepad, paramsRight.startX, paramsRight.startY, paramsRight.buttonRadius, paramsRight.buttonPadding);
 	}
 
 	obdDumpBuffer(&obd, NULL);
 }
 
+I2CDisplayAddon::DisplayMode I2CDisplayAddon::getDisplayMode() {
+	if (configMode) {
+		gamepad->read();
+		uint16_t buttonState = gamepad->state.buttons;
+		if (prevButtonState && !buttonState) { // has button been pressed (held and released)?
+			switch (prevButtonState) {
+				case (GAMEPAD_MASK_B1):
+					prevDisplayMode =
+						prevDisplayMode == I2CDisplayAddon::DisplayMode::BUTTONS ?
+							I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION : I2CDisplayAddon::DisplayMode::BUTTONS;
+						break;
+				case (GAMEPAD_MASK_B2):
+					prevDisplayMode =
+						prevDisplayMode == I2CDisplayAddon::DisplayMode::SPLASH ?
+							I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION : I2CDisplayAddon::DisplayMode::SPLASH;
+					break;
+				default:
+					prevDisplayMode = I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION;
+			}
+		}
+		prevButtonState = buttonState;
+		return prevDisplayMode;
+	} else {
+		if (Storage::getInstance().getBoardOptions().splashMode != NOSPLASH) {
+			int splashDuration = getBoardOptions().splashDuration;
+			if (splashDuration == 0 || getMillis() < splashDuration) {
+				return I2CDisplayAddon::DisplayMode::SPLASH;
+			}				
+		}
+	}
+
+	return I2CDisplayAddon::DisplayMode::BUTTONS;
+}
+
 BoardOptions I2CDisplayAddon::getBoardOptions() {
-	bool configMode = Storage::getInstance().GetConfigMode();	
+	bool configMode = Storage::getInstance().GetConfigMode();
 	return configMode ? Storage::getInstance().getPreviewBoardOptions() : Storage::getInstance().getBoardOptions();
 }
 
