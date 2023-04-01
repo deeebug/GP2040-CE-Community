@@ -115,6 +115,21 @@ struct AddonOptions {
 	uint8_t buzzerPin;
 	uint8_t buzzerVolume;
 	uint8_t playerNumber;
+	uint8_t shmupMode; // Turbo SHMUP Mode
+	uint8_t shmupMixMode; // How we mix turbo and non-turbo buttons
+	uint16_t shmupAlwaysOn1;
+	uint16_t shmupAlwaysOn2;
+	uint16_t shmupAlwaysOn3;
+	uint16_t shmupAlwaysOn4;
+	uint8_t pinShmupBtn1;
+	uint8_t pinShmupBtn2;
+	uint8_t pinShmupBtn3;
+	uint8_t pinShmupBtn4;
+	uint16_t shmupBtnMask1;
+	uint16_t shmupBtnMask2;
+	uint16_t shmupBtnMask3;
+	uint16_t shmupBtnMask4;
+	uint8_t pinShmupDial;
 	uint8_t AnalogInputEnabled;
 	uint8_t BoardLedAddonEnabled;
 	uint8_t BootselButtonAddonEnabled;
@@ -184,8 +199,9 @@ public:
 	void setDefaultBoardOptions();
 	BoardOptions getBoardOptions();
 	
-	void setPreviewBoardOptions(const BoardOptions&);	// Board Options
+	void setPreviewBoardOptions(const BoardOptions&);	// Preview Board Options
 	BoardOptions getPreviewBoardOptions();
+	
 	void setAddonOptions(AddonOptions); // Add-On Options
 	void setDefaultAddonOptions();
 	AddonOptions getAddonOptions();
@@ -212,13 +228,6 @@ public:
 	uint8_t * GetFeatureData();
 
 	void ResetSettings(); 				// EEPROM Reset Feature
-
-	int GetButtonLayout();
-	int GetButtonLayoutRight();
-
-	int GetSplashMode();
-	int GetSplashChoice();
-	int GetSplashDuration();
 
 private:
 	Storage() : gamepad(0) {

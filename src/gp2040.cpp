@@ -20,6 +20,7 @@
 // Pico includes
 #include "pico/bootrom.h"
 #include "pico/time.h"
+#include "hardware/adc.h"
 
 // TinyUSB
 #include "usb_driver.h"
@@ -83,6 +84,9 @@ void GP2040::setup() {
 				break;
 			}
 	}
+
+	// Initialize our ADC (various add-ons)
+	adc_init();
 
 	// Setup Add-ons
 	addons.LoadAddon(new AnalogInput(), CORE0_INPUT);

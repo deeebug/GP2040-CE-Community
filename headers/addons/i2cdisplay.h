@@ -65,12 +65,6 @@
 // i2c Display Module
 #define I2CDisplayName "I2CDisplay"
 
-enum DisplayPreviewMode {
-	PREVIEW_MODE_NONE,
-	PREVIEW_MODE_BUTTONS,
-	PREVIEW_MODE_SPLASH
-};
-
 // i2C OLED Display
 class I2CDisplayAddon : public GPAddon
 {
@@ -89,6 +83,7 @@ private:
 	void drawArcadeStick(int startX, int startY, int buttonRadius, int buttonPadding);
 	void drawStatusBar(Gamepad*);
 	void drawText(int startX, int startY, std::string text);
+	void drawText(int startX, int startY, std::string text, bool invert);
 	void initMenu(char**);
 	//Adding my stuff here, remember to sort before PR
 	void drawDiamond(int cx, int cy, int size, uint8_t colour, uint8_t filled);
@@ -136,9 +131,46 @@ private:
 	std::string statusBar;
 	Gamepad* gamepad;
 	Gamepad* pGamepad;
-	private:
-	DisplayPreviewMode displayPreviewMode;
+	bool configMode;
+
+	enum DisplayMode {
+		CONFIG_INSTRUCTION,
+		BUTTONS,
+		SPLASH,
+		CALCULATOR
+	};
+
+	DisplayMode getDisplayMode(uint16_t prevButtonState, uint16_t buttonState);
+	DisplayMode prevDisplayMode;
 	uint16_t prevButtonState;
+	uint16_t prevDpadState;
+
+	// CALCULATOR
+	uint32_t firstOp;
+	uint32_t secondOp;
+
+	enum CalculatorState {
+	  FIRST_OP,
+	  OP_PICK,
+	  SECOND_OP,
+	  RESULT
+	};
+
+	enum OpChoice {
+	  SUM,
+	  DIFF,
+	  MUL,
+	  DIV
+	};
+
+	CalculatorState calcState;
+	uint8_t currentDigit;
+	OpChoice opChoice;
+	double calcResult;
+	char getOpChar(OpChoice opChoice);
+	void nextCalcState();
+	void nextOpChoice();
+	uint8_t getPressedDigit();
 };
 
 #endif

@@ -9,6 +9,7 @@
 #include "storagemanager.h"
 #include "pico/stdlib.h"
 #include "bitmaps.h"
+#include <cmath>
 
 bool I2CDisplayAddon::available() {
 	BoardOptions boardOptions = getBoardOptions();
@@ -18,9 +19,8 @@ bool I2CDisplayAddon::available() {
 }
 
 void I2CDisplayAddon::setup() {
-	displayPreviewMode = PREVIEW_MODE_NONE;
-	prevButtonState = 0;
 	BoardOptions boardOptions = getBoardOptions();
+
 	obdI2CInit(&obd,
 	    boardOptions.displaySize,
 		boardOptions.displayI2CAddress,
@@ -32,22 +32,25 @@ void I2CDisplayAddon::setup() {
 		boardOptions.i2cBlock == 0 ? i2c0 : i2c1,
 		-1,
 		boardOptions.i2cSpeed);
+		
 	const int detectedDisplay = initDisplay(0);
 	if (isSH1106(detectedDisplay)) {
 		// The display is actually a SH1106 that was misdetected as a SSD1306 by OneBitDisplay.
 		// Reinitialize as SH1106.
 		initDisplay(OLED_132x64);
 	}
- 
-	displayPreviewMode = PREVIEW_MODE_NONE;
-	prevButtonState = 0;
-	displaySaverTimeout = displaySaverTimer = boardOptions.displaySaverTimeout * 60000; // minute to ms
 	
 	obdSetContrast(&obd, 0xFF);
 	obdSetBackBuffer(&obd, ucBackBuffer);
 	clearScreen(1);
 	gamepad = Storage::getInstance().GetGamepad();
 	pGamepad = Storage::getInstance().GetProcessedGamepad();
+
+	prevButtonState = 0;
+	prevDpadState = 0;
+	displaySaverTimer = boardOptions.displaySaverTimeout;
+	displaySaverTimeout = displaySaverTimer;
+	configMode = Storage::getInstance().GetConfigMode();
 }
 
 bool I2CDisplayAddon::isDisplayPowerOff()
@@ -78,149 +81,222 @@ void I2CDisplayAddon::setDisplayPower(uint8_t status)
 }
 
 void I2CDisplayAddon::process() {
-	bool configMode = Storage::getInstance().GetConfigMode();
-
 	if (!configMode && isDisplayPowerOff()) return;
 
-	int splashDuration = Storage::getInstance().GetSplashDuration();
-	splashDuration = splashDuration == 0 ? SPLASH_DURATION : splashDuration;
-
 	clearScreen(0);
-	if (configMode) {
-		gamepad->read();
-		uint16_t buttonState = gamepad->state.buttons;
-		if (prevButtonState && !buttonState) {
-				if (prevButtonState == GAMEPAD_MASK_B1)
-					displayPreviewMode = displayPreviewMode == PREVIEW_MODE_BUTTONS ? PREVIEW_MODE_NONE : PREVIEW_MODE_BUTTONS;
-				else if (prevButtonState == GAMEPAD_MASK_B2)
-					displayPreviewMode = displayPreviewMode == PREVIEW_MODE_SPLASH ? PREVIEW_MODE_NONE : PREVIEW_MODE_SPLASH;
-				else
-					displayPreviewMode = PREVIEW_MODE_NONE;
+	
+	gamepad->read();
+	uint16_t buttonState = gamepad->state.buttons;
+	uint16_t dpadState = gamepad->state.dpad;
+	switch (getDisplayMode(prevButtonState, buttonState)) {
+		case I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION:
+			drawStatusBar(gamepad);
+			drawText(0, 2, "[Web Config Mode]");
+			drawText(0, 3, std::string("GP2040-CE : ") + std::string(GP2040VERSION));
+			drawText(0, 4, "[http://192.168.7.1]");
+			drawText(0, 5, "Preview:");
+			drawText(5, 6, "B1 > Button");
+			drawText(5, 7, "B2 > Splash");
+			break;
+		case I2CDisplayAddon::DisplayMode::CALCULATOR: {
+			drawText(0, 1, "[Calculator]");
+			drawText(0, 2, std::to_string(firstOp), calcState == FIRST_OP);
+			drawText(0, 3, std::string(1, getOpChar(opChoice)), calcState == OP_PICK);
+			drawText(0, 4, std::to_string(secondOp), calcState == SECOND_OP);
+			drawText(0, 5, "---------------------------------------");
+
+			std::string calcResultStr = std::to_string (calcResult);
+			calcResultStr.erase ( calcResultStr.find_last_not_of('0') + 1, std::string::npos );
+			calcResultStr.erase ( calcResultStr.find_last_not_of('.') + 1, std::string::npos );
+			drawText(0, 6, calcResultStr, calcState == RESULT);			
+
+			uint8_t pressedDigit = getPressedDigit();
+			switch (pressedDigit) {
+			  case ((uint8_t)-1): break;
+			  case 11:
+			    if (calcState == SECOND_OP) {
+			      switch (opChoice) {
+				case SUM: calcResult = ((double) firstOp) + secondOp; break;
+				case DIFF: calcResult = ((double) firstOp) - secondOp; break;
+				case MUL: calcResult = ((double) firstOp) * secondOp; break;
+				case DIV: calcResult = ((double) firstOp) / (secondOp == 0 ? 1 : secondOp); break;
+			      }
+			    }
+			    if (calcState == RESULT) { calcResult = 0; firstOp = 0; secondOp = 0; opChoice = SUM; }
+			    currentDigit = 0;
+			    nextCalcState();
+			    break;
+			  case 10:
+			    currentDigit--;
+			    if (calcState == FIRST_OP) firstOp /= 10;
+			    else if (calcState == SECOND_OP) secondOp /= 10;
+			    else if (calcState == OP_PICK) nextOpChoice();
+			    break;
+			  default:
+			    if (calcState == FIRST_OP) firstOp += pressedDigit * (std::pow(10, currentDigit));
+			    else if (calcState == SECOND_OP) secondOp += pressedDigit * (std::pow(10, currentDigit));
+			    else if (calcState == OP_PICK) nextOpChoice();
+			    currentDigit++;
+			    break;
+			}
 		}
-		prevButtonState = buttonState;
+		break;
+		case I2CDisplayAddon::DisplayMode::SPLASH:
+			if (getBoardOptions().splashMode == NOSPLASH) {
+				drawText(0, 4, " Splash NOT enabled.");
+				break;
+			}
+			drawSplashScreen(getBoardOptions().splashMode, (uint8_t*) Storage::getInstance().getSplashImage().data, 90);
+			break;
+		case I2CDisplayAddon::DisplayMode::BUTTONS:
+			drawStatusBar(gamepad);
+			BoardOptions boardOptions = getBoardOptions();
+			ButtonLayoutCustomOptions buttonLayoutCustomOptions = boardOptions.buttonLayoutCustomOptions;
+			switch (boardOptions.buttonLayout) {
+				case BUTTON_LAYOUT_STICK:
+					drawArcadeStick(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_STICKLESS:
+					drawStickless(8, 20, 8, 2);
+					break;
+				case BUTTON_LAYOUT_BUTTONS_ANGLED:
+					drawWasdBox(8, 28, 7, 3);
+					break;
+				case BUTTON_LAYOUT_BUTTONS_BASIC:
+					drawUDLR(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_KEYBOARD_ANGLED:
+					drawKeyboardAngled(18, 28, 5, 2);
+					break;
+				case BUTTON_LAYOUT_KEYBOARDA:
+					drawMAMEA(8, 28, 10, 1);
+					break;
+				case BUTTON_LAYOUT_DANCEPADA:
+					drawDancepadA(39, 12, 15, 2);
+					break;
+				case BUTTON_LAYOUT_TWINSTICKA:
+					drawTwinStickA(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_BLANKA:
+					drawBlankA(0, 0, 0, 0);
+					break;
+				case BUTTON_LAYOUT_VLXA:
+					drawVLXA(7, 28, 7, 2);
+					break;
+				case BUTTON_LAYOUT_CUSTOMA:
+					drawButtonLayoutLeft(buttonLayoutCustomOptions);
+					break;
+				case BUTTON_LAYOUT_FIGHTBOARD_STICK:
+					drawArcadeStick(18, 22, 8, 2);
+					break;
+				case BUTTON_LAYOUT_FIGHTBOARD_MIRRORED:
+					drawFightboardMirrored(0, 22, 7, 2);
+					break;
+			}
+
+			switch (boardOptions.buttonLayoutRight) {
+				case BUTTON_LAYOUT_ARCADE:
+					drawArcadeButtons(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_STICKLESSB:
+					drawSticklessButtons(8, 20, 8, 2);
+					break;
+				case BUTTON_LAYOUT_BUTTONS_ANGLEDB:
+					drawWasdButtons(8, 28, 7, 3);
+					break;
+				case BUTTON_LAYOUT_VEWLIX:
+					drawVewlix(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_VEWLIX7:
+					drawVewlix7(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_CAPCOM:
+					drawCapcom(6, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_CAPCOM6:
+					drawCapcom6(16, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_SEGA2P:
+					drawSega2p(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_NOIR8:
+					drawNoir8(8, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_KEYBOARDB:
+					drawMAMEB(68, 28, 10, 1);
+					break;
+				case BUTTON_LAYOUT_DANCEPADB:
+					drawDancepadB(39, 12, 15, 2);
+					break;
+				case BUTTON_LAYOUT_TWINSTICKB:
+					drawTwinStickB(100, 28, 8, 2);
+					break;
+				case BUTTON_LAYOUT_BLANKB:
+					drawSticklessButtons(0, 0, 0, 0);
+					break;
+				case BUTTON_LAYOUT_VLXB:
+					drawVLXB(6, 28, 7, 2);
+					break;
+				case BUTTON_LAYOUT_CUSTOMB:
+					drawButtonLayoutRight(buttonLayoutCustomOptions);
+					break;
+				case BUTTON_LAYOUT_FIGHTBOARD:
+					drawFightboard(8, 22, 7, 3);
+					break;
+				case BUTTON_LAYOUT_FIGHTBOARD_STICK_MIRRORED:
+					drawArcadeStick(90, 22, 8, 2);
+					break;
+			}
+			break;
 	}
-
-	if (configMode && displayPreviewMode == PREVIEW_MODE_NONE) {
-		drawStatusBar(gamepad);
-		drawText(0, 2, "[Web Config Mode]");
-		drawText(0, 3, std::string("GP2040-CE : ") + std::string(GP2040VERSION));
-		drawText(0, 4, "[http://192.168.7.1]");
-		drawText(0, 5, "Preview:");
-		drawText(5, 6, "B1 > Button");
-		drawText(5, 7, "B2 > Splash");
-	} else if ((configMode && displayPreviewMode == PREVIEW_MODE_SPLASH) ||
-			   (!configMode && (splashDuration == -1 || getMillis() < splashDuration)
-			    && Storage::getInstance().GetSplashMode() != NOSPLASH)) {
-		const uint8_t* splashChoice = Storage::getInstance().getSplashImage().data;
-		drawSplashScreen(Storage::getInstance().GetSplashMode(), (uint8_t *)splashChoice, 90);
-	} else {
-		drawStatusBar(gamepad);
-		ButtonLayoutCustomOptions options = getBoardOptions().buttonLayoutCustomOptions;
-
-		switch (Storage::getInstance().GetButtonLayout())
-		{
-			case BUTTON_LAYOUT_STICK:
-				drawArcadeStick(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_STICKLESS:
-				drawStickless(8, 20, 8, 2);
-				break;
-			case BUTTON_LAYOUT_BUTTONS_ANGLED:
-				drawWasdBox(8, 28, 7, 3);
-				break;
-			case BUTTON_LAYOUT_BUTTONS_BASIC:
-				drawUDLR(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_KEYBOARD_ANGLED:
-				drawKeyboardAngled(18, 28, 5, 2);
-				break;
-			case BUTTON_LAYOUT_KEYBOARDA:
-				drawMAMEA(8, 28, 10, 1);
-				break;
-			case BUTTON_LAYOUT_DANCEPADA:
-				drawDancepadA(39, 12, 15, 2);
-				break;
-			case BUTTON_LAYOUT_TWINSTICKA:
-				drawTwinStickA(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_BLANKA:
-				drawBlankA(0, 0, 0, 0);
-				break;
-			case BUTTON_LAYOUT_VLXA:
-				drawVLXA(7, 28, 7, 2);
-				break;
-			case BUTTON_LAYOUT_CUSTOMA:
-				drawButtonLayoutLeft(options);
-				break;
-			case BUTTON_LAYOUT_FIGHTBOARD_STICK:
-				drawArcadeStick(18, 22, 8, 2);
-				break;
-			case BUTTON_LAYOUT_FIGHTBOARD_MIRRORED:
-				drawFightboardMirrored(0, 22, 7, 2);
-				break;
-		}
-
-		switch (Storage::getInstance().GetButtonLayoutRight())
-		{
-			case BUTTON_LAYOUT_ARCADE:
-				drawArcadeButtons(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_STICKLESSB:
-				drawSticklessButtons(8, 20, 8, 2);
-				break;
-			case BUTTON_LAYOUT_BUTTONS_ANGLEDB:
-				drawWasdButtons(8, 28, 7, 3);
-				break;
-			case BUTTON_LAYOUT_VEWLIX:
-				drawVewlix(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_VEWLIX7:
-				drawVewlix7(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_CAPCOM:
-				drawCapcom(6, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_CAPCOM6:
-				drawCapcom6(16, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_SEGA2P:
-				drawSega2p(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_NOIR8:
-				drawNoir8(8, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_KEYBOARDB:
-				drawMAMEB(68, 28, 10, 1);
-				break;
-			case BUTTON_LAYOUT_DANCEPADB:
-				drawDancepadB(39, 12, 15, 2);
-				break;
-			case BUTTON_LAYOUT_TWINSTICKB:
-				drawTwinStickB(100, 28, 8, 2);
-				break;
-			case BUTTON_LAYOUT_BLANKB:
-				drawSticklessButtons(0, 0, 0, 0);
-				break;
-			case BUTTON_LAYOUT_VLXB:
-				drawVLXB(6, 28, 7, 2);
-				break;
-			case BUTTON_LAYOUT_CUSTOMB:
-				drawButtonLayoutRight(options);
-				break;
-			case BUTTON_LAYOUT_FIGHTBOARD:
-				drawFightboard(8, 22, 7, 3);
-				break;
-			case BUTTON_LAYOUT_FIGHTBOARD_STICK_MIRRORED:
-				drawArcadeStick(90, 22, 8, 2);
-				break;
-		}
-	}
+	
+	prevButtonState = buttonState;
+	prevDpadState = dpadState;
 
 	obdDumpBuffer(&obd, NULL);
 }
 
+I2CDisplayAddon::DisplayMode I2CDisplayAddon::getDisplayMode(uint16_t prevButtonState, uint16_t buttonState) {
+	if (configMode) {
+		if (prevButtonState && !buttonState) { // has button been pressed (held and released)?
+			switch (prevButtonState) {
+				case (GAMEPAD_MASK_B1):
+					if (prevDisplayMode != I2CDisplayAddon::DisplayMode::CALCULATOR)
+					  prevDisplayMode =
+						prevDisplayMode == I2CDisplayAddon::DisplayMode::BUTTONS ?
+							I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION : I2CDisplayAddon::DisplayMode::BUTTONS;
+						break;
+				case (GAMEPAD_MASK_B2):
+					if (prevDisplayMode != I2CDisplayAddon::DisplayMode::CALCULATOR)
+					    prevDisplayMode =
+						prevDisplayMode == I2CDisplayAddon::DisplayMode::SPLASH ?
+							I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION : I2CDisplayAddon::DisplayMode::SPLASH;
+					break;
+				case (GAMEPAD_MASK_S2):
+					if (getMillis() < 1000) break;
+					prevDisplayMode =
+						prevDisplayMode == I2CDisplayAddon::DisplayMode::CALCULATOR ?
+							I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION : I2CDisplayAddon::DisplayMode::CALCULATOR;
+					break;
+				default:
+					prevDisplayMode = I2CDisplayAddon::DisplayMode::CONFIG_INSTRUCTION;
+			}
+		}
+		return prevDisplayMode;
+	} else {
+		if (Storage::getInstance().getBoardOptions().splashMode != NOSPLASH) {
+			int splashDuration = getBoardOptions().splashDuration;
+			if (splashDuration == 0 || getMillis() < splashDuration) {
+				return I2CDisplayAddon::DisplayMode::SPLASH;
+			}				
+		}
+	}
+
+	return I2CDisplayAddon::DisplayMode::BUTTONS;
+}
+
 BoardOptions I2CDisplayAddon::getBoardOptions() {
-	bool configMode = Storage::getInstance().GetConfigMode();	
+	bool configMode = Storage::getInstance().GetConfigMode();
 	return configMode ? Storage::getInstance().getPreviewBoardOptions() : Storage::getInstance().getBoardOptions();
 }
 
@@ -882,6 +958,10 @@ void I2CDisplayAddon::drawText(int x, int y, std::string text) {
 	obdWriteString(&obd, 0, x, y, (char*)text.c_str(), FONT_6x8, 0, 0);
 }
 
+void I2CDisplayAddon::drawText(int x, int y, std::string text, bool invert) {
+	obdWriteString(&obd, 0, x, y, (char*)text.c_str(), FONT_6x8, invert, 0);
+}
+
 void I2CDisplayAddon::drawStatusBar(Gamepad * gamepad)
 {
 	BoardOptions boardOptions = getBoardOptions();
@@ -969,4 +1049,48 @@ bool I2CDisplayAddon::pressedRight()
 	}
 
 	return false;
+}
+
+char I2CDisplayAddon::getOpChar(OpChoice opChoice) {
+  switch (opChoice) {
+    case SUM:  return '+';
+    case DIFF: return '-';
+    case MUL:  return '*';
+    case DIV:  return '/';
+  }
+  return '+';
+}
+
+uint8_t I2CDisplayAddon::getPressedDigit() {
+  uint16_t buttonState = gamepad->state.buttons;
+  uint16_t dpadState = gamepad->state.dpad;
+  if (prevDpadState && !dpadState) { // has button been pressed (held and released)?
+	switch (prevDpadState) {
+		case (GAMEPAD_MASK_UP   ): return 11;
+	        case (GAMEPAD_MASK_DOWN ): return 9;
+	        case (GAMEPAD_MASK_LEFT ): return 10;
+	        case (GAMEPAD_MASK_RIGHT): return 0;
+	}
+  }
+  if (prevButtonState && !buttonState) { // has button been pressed (held and released)?
+	  switch (prevButtonState) {
+		  case (GAMEPAD_MASK_B1):	   return 1;
+		  case (GAMEPAD_MASK_B2):	   return 2;
+		  case (GAMEPAD_MASK_B3):	   return 5;
+		  case (GAMEPAD_MASK_B4):	   return 6;
+		  case (GAMEPAD_MASK_L1):	   return 7;
+		  case (GAMEPAD_MASK_R1):	   return 6;
+		  case (GAMEPAD_MASK_L2):	   return 4;
+		  case (GAMEPAD_MASK_R2):	   return 3;		
+	}
+  }
+  return (uint8_t) -1;
+}
+
+void I2CDisplayAddon::nextCalcState() {
+  calcState = static_cast<I2CDisplayAddon::CalculatorState>((static_cast<int>(calcState) + 1) % 4);    
+}
+
+void I2CDisplayAddon::nextOpChoice() {
+  opChoice = static_cast<I2CDisplayAddon::OpChoice>((static_cast<int>(opChoice) + 1) % 4);    
 }
