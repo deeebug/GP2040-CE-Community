@@ -58,6 +58,11 @@ static XInputReport xinputReport
 	._reserved = { },
 };
 
+static KeyboardReport keyboardReport
+{
+	.keycode = {HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE, HID_KEY_NONE}
+};
+
 void Gamepad::setup()
 {
 	//load(); // MPGS loads
@@ -301,6 +306,9 @@ void * Gamepad::getReport()
 		case INPUT_MODE_SWITCH:
 			return getSwitchReport();
 
+		case INPUT_MODE_KEYBOARD:
+			return getKeyboardReport();
+
 		default:
 			return getHIDReport();
 	}
@@ -316,6 +324,9 @@ uint16_t Gamepad::getReportSize()
 
 		case INPUT_MODE_SWITCH:
 			return sizeof(SwitchReport);
+
+		case INPUT_MODE_KEYBOARD:
+			return sizeof(KeyboardReport);
 
 		default:
 			return sizeof(HIDReport);
@@ -443,6 +454,12 @@ XInputReport *Gamepad::getXInputReport()
 	}
 
 	return &xinputReport;
+}
+
+KeyboardReport *Gamepad::getKeyboardReport()
+{
+	keyboardReport.keycode[0] = pressedUp() ? HID_KEY_A : HID_KEY_NONE;
+	return &keyboardReport;
 }
 
 /* Gamepad stuffs */
