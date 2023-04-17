@@ -199,6 +199,12 @@ uint8_t DualDirectionalInput::SOCDGamepadClean(uint8_t gamepadState) {
 
 uint8_t DualDirectionalInput::SOCDCombine(SOCDMode mode, uint8_t gamepadState) {
     uint8_t outState = dualState | gamepadState;
+
+    // TODO: Correct?
+    if (mode == SOCD_MODE_BYPASS) {
+        return outState;
+    }
+
     switch (outState & (GAMEPAD_MASK_UP | GAMEPAD_MASK_DOWN)) {
         case (GAMEPAD_MASK_UP | GAMEPAD_MASK_DOWN): // If last state was Up or Down, exclude it from our gamepad
             if ( mode == SOCD_MODE_NEUTRAL )
@@ -221,6 +227,11 @@ uint8_t DualDirectionalInput::SOCDCombine(SOCDMode mode, uint8_t gamepadState) {
 }
 
 void DualDirectionalInput::SOCDDualClean(SOCDMode socdMode) {
+    // TODO: Is this correct?
+    if (socdMode == SOCD_MODE_BYPASS) {
+        return;
+    }
+
     // Dual SOCD Last-Win Clean
     switch (dualState & (GAMEPAD_MASK_UP | GAMEPAD_MASK_DOWN)) {
         case (GAMEPAD_MASK_UP | GAMEPAD_MASK_DOWN): // If last state was Up or Down, exclude it from our gamepad

@@ -32,6 +32,7 @@
 #define MSB(n) ((n >> 8) & 255)
 
 // HAT report (4 bits)
+// TODO: This needs to be reworked into independent directions
 #define HID_HAT_UP        0x00
 #define HID_HAT_UPRIGHT   0x01
 #define HID_HAT_RIGHT     0x02
@@ -175,6 +176,7 @@ static const uint8_t hid_report_descriptor[] =
 	0x75, 0x04,        //   REPORT_SIZE (4)
 	0x95, 0x01,        //   REPORT_COUNT (1)
 	0x65, 0x14,        //   UNIT (Eng Rot:Angular Pos)
+	// TODO: Does this need changing?
 	0x09, 0x39,        //   USAGE (Hat switch)
 	0x81, 0x42,        //   INPUT (Data,Var,Abs,Null)
 	0x65, 0x00,        //   UNIT (None)

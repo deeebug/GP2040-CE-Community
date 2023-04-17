@@ -28,6 +28,7 @@ typedef enum
 // The available SOCD cleaning methods
 typedef enum
 {
+	SOCD_MODE_BYPASS,                // U+D=UD, L+R=LR (No cleaning applied)
 	SOCD_MODE_UP_PRIORITY,           // U+D=U, L+R=N
 	SOCD_MODE_NEUTRAL,               // U+D=N, L+R=N
 	SOCD_MODE_SECOND_INPUT_PRIORITY, // U>D=D, L>R=R (Last Input Priority, aka Last Win)
