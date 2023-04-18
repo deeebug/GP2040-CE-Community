@@ -16,28 +16,6 @@ enum {
 
 #endif /* USB_DESCRIPTORS_H_ */
 
-#define KEYBOARD_ENDPOINT_SIZE 64
-
-// HAT1 report (8 bits)
-#define KEYBOARD_MASK_LEFT    0x00
-#define KEYBOARD_MASK_RIGHT   0xff
-
-// HAT2 report (8 bits)
-#define KEYBOARD_MASK_UP      0x00
-#define KEYBOARD_MASK_DOWN    0xff
-
-// Buttons 1 (8 bits)
-#define KEYBOARD_MASK_X       0x80
-#define KEYBOARD_MASK_A       0x40
-#define KEYBOARD_MASK_B       0x20
-#define KEYBOARD_MASK_Y       0x10
-
-// Buttons 2 (8 bits)
-#define KEYBOARD_MASK_C       0x02
-#define KEYBOARD_MASK_Z       0x01
-#define KEYBOARD_MASK_START   0x20
-#define KEYBOARD_MASK_MODE    0x10
-
 /// Standard HID Boot Protocol Keyboard Report.
 typedef struct TU_ATTR_PACKED
 {
@@ -63,20 +41,17 @@ static const uint8_t keyboard_device_descriptor[] =
 {
 	sizeof(tusb_desc_device_t),
   TUSB_DESC_DEVICE,
-  0x00, 0x02,
+  0x10, 0x01,
   0x00,
   0x00,
   0x00,
-  CFG_TUD_ENDPOINT0_SIZE,
-
-  0xfe, 0xCa,
-  0x01, 0x00,
+  8,
+  0x4f, 0x1c,
+  0x02, 0x00,
   0x00, 0x01,
-
   0x01,
   0x02,
-  0x03,
-
+  0x00,
   0x01
 };
 
@@ -91,17 +66,25 @@ enum
 #define EPNUM_HID   0x81
 
 static const uint8_t keyboard_report_descriptor[] = {
-  TUD_HID_REPORT_DESC_KEYBOARD( HID_REPORT_ID(REPORT_ID_KEYBOARD))
+  TUD_HID_REPORT_DESC_KEYBOARD(HID_REPORT_ID(REPORT_ID_KEYBOARD))
 };
 
 // Interface number, string index, protocol, report descriptor len, EP In address, size & polling interval
 static const uint8_t keyboard_hid_descriptor[] = {
-  TUD_HID_DESCRIPTOR(ITF_NUM_HID_KEYBOARD, 0, HID_ITF_PROTOCOL_NONE, sizeof(keyboard_report_descriptor), EPNUM_HID, CFG_TUD_HID_EP_BUFSIZE, 5)
+    0x09,								 // bLength
+		0x21,								 // bDescriptorType (HID)
+		0x11, 0x01,							 // bcdHID 1.11
+		0x00,								 // bCountryCode
+		0x01,								 // bNumDescriptors
+		0x22,								 // bDescriptorType[0] (HID)
+		sizeof(keyboard_report_descriptor), 0x00, // wDescriptorLength[0] 90
 };
 
 static const uint8_t keyboard_configuration_descriptor[] =
 {
   // Config number, interface count, string index, total length, attribute, power in mA
-  TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL_KEYBOARD, 0, CONFIG_TOTAL_LEN, TUSB_DESC_CONFIG_ATT_REMOTE_WAKEUP, 100),
-  
+  TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL_KEYBOARD, 0, CONFIG_TOTAL_LEN, 32, 100),
+
+  // Interface number, string index, protocol, report descriptor len, EP Out & In address, size & polling interval
+  TUD_HID_DESCRIPTOR(ITF_NUM_HID_KEYBOARD, 0, HID_ITF_PROTOCOL_NONE, sizeof(keyboard_report_descriptor), EPNUM_HID, CFG_TUD_HID_EP_BUFSIZE, 1)
 };
