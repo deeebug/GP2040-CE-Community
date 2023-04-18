@@ -460,7 +460,12 @@ XInputReport *Gamepad::getXInputReport()
 
 KeyboardReport *Gamepad::getKeyboardReport()
 {
-	keyboardReport.keycode[0] = pressedUp() ? HID_KEY_A : HID_KEY_NONE;
+	keyboardReport.keycode[0] = pressedUp() ? HID_KEY_W : HID_KEY_NONE;
+	keyboardReport.keycode[1] = pressedDown() ? HID_KEY_A : HID_KEY_NONE;
+	keyboardReport.keycode[2] = pressedLeft() ? HID_KEY_S : HID_KEY_NONE;
+	keyboardReport.keycode[3] = pressedRight() ? HID_KEY_D : HID_KEY_NONE;
+	keyboardReport.keycode[4] = pressedB1() ? HID_KEY_Y : HID_KEY_NONE;
+	keyboardReport.keycode[5] = pressedB2() ? HID_KEY_U : HID_KEY_NONE;
 	return &keyboardReport;
 }
 
