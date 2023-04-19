@@ -15,13 +15,14 @@ enum {
 };
 
 #endif /* USB_DESCRIPTORS_H_ */
+#define REPORT_BYTES 8
 
 /// Standard HID Boot Protocol Keyboard Report.
 typedef struct TU_ATTR_PACKED
 {
   uint8_t modifier;   /**< Keyboard modifier (KEYBOARD_MODIFIER_* masks). */
-  uint8_t reserved;   /**< Reserved for OEM use, always set to 0. */
-  uint8_t keycode[6]; /**< Key codes of the currently pressed keys. */
+ // uint8_t reserved;   /**< Reserved for OEM use, always set to 0. */
+  uint8_t keycode[REPORT_BYTES - 1]; /**< Key codes of the currently pressed keys. */
 } KeyboardReport;
 
 static const uint8_t keyboard_string_language[]    = { 0x09, 0x04 };
@@ -66,36 +67,38 @@ enum
 #define EPNUM_HID   0x81
 
 static const uint8_t keyboard_report_descriptor[] = {
-  0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-    0x09, 0x06,                    // USAGE (Keyboard)
-    0xa1, 0x01,                    // COLLECTION (Application)
-    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
-    0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)
-    0x29, 0xe7,                    //   USAGE_MAXIMUM (Keyboard Right GUI)
-    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-    0x75, 0x01,                    //   REPORT_SIZE (1)
-    0x95, 0x08,                    //   REPORT_COUNT (8)
-    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
-    0x95, 0x01,                    //   REPORT_COUNT (1)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x81, 0x03,                    //   INPUT (Cnst,Var,Abs)
-    0x95, 0x05,                    //   REPORT_COUNT (5)
-    0x75, 0x01,                    //   REPORT_SIZE (1)
-    0x05, 0x08,                    //   USAGE_PAGE (LEDs)
-    0x19, 0x01,                    //   USAGE_MINIMUM (Num Lock)
-    0x29, 0x05,                    //   USAGE_MAXIMUM (Kana)
-    0x91, 0x02,                    //   OUTPUT (Data,Var,Abs)
-    0x95, 0x01,                    //   REPORT_COUNT (1)
-    0x75, 0x03,                    //   REPORT_SIZE (3)
-    0x91, 0x03,                    //   OUTPUT (Cnst,Var,Abs)
-    0x95, 0x06,                    //   REPORT_COUNT (6)
-    0x75, 0x08,                    //   REPORT_SIZE (8)
-    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
-    0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))
-    0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
-    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
-    0xc0                           // END_COLLECTION
+  0x05, 0x01,                     // Usage Page (Generic Desktop),
+        0x09, 0x06,                     // Usage (Keyboard),
+        0xA1, 0x01,                     // Collection (Application),
+        // bitmap of modifiers
+        0x75, 0x01,                     //   Report Size (1),
+        0x95, 0x08,                     //   Report Count (8),
+        0x05, 0x07,                     //   Usage Page (Key Codes),
+        0x19, 0xE0,                     //   Usage Minimum (224),
+        0x29, 0xE7,                     //   Usage Maximum (231),
+        0x15, 0x00,                     //   Logical Minimum (0),
+        0x25, 0x01,                     //   Logical Maximum (1),
+        0x81, 0x02,                     //   Input (Data, Variable, Absolute), ;Modifier byte
+        // LED output report
+        0x95, 0x05,                     //   Report Count (5),
+        0x75, 0x01,                     //   Report Size (1),
+        0x05, 0x08,                     //   Usage Page (LEDs),
+        0x19, 0x01,                     //   Usage Minimum (1),
+        0x29, 0x05,                     //   Usage Maximum (5),
+        0x91, 0x02,                     //   Output (Data, Variable, Absolute),
+        0x95, 0x01,                     //   Report Count (1),
+        0x75, 0x03,                     //   Report Size (3),
+        0x91, 0x03,                     //   Output (Constant),
+        // bitmap of keys
+        0x95, (REPORT_BYTES-1)*8,	//   Report Count (),
+        0x75, 0x01,                     //   Report Size (1),
+        0x15, 0x00,                     //   Logical Minimum (0),
+        0x25, 0x01,                     //   Logical Maximum(1),
+        0x05, 0x07,                     //   Usage Page (Key Codes),
+        0x19, 0x00,                     //   Usage Minimum (0),
+        0x29, (REPORT_BYTES-1)*8-1,	//   Usage Maximum (),
+        0x81, 0x02,                     //   Input (Data, Variable, Absolute),
+        0xc0                            // End Collection
 };
 
 // Interface number, string index, protocol, report descriptor len, EP In address, size & polling interval
@@ -115,5 +118,5 @@ static const uint8_t keyboard_configuration_descriptor[] =
   TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL_KEYBOARD, 0, CONFIG_TOTAL_LEN, 32, 100),
 
   // Interface number, string index, protocol, report descriptor len, EP Out & In address, size & polling interval
-  TUD_HID_DESCRIPTOR(ITF_NUM_HID_KEYBOARD, 0, HID_ITF_PROTOCOL_NONE, sizeof(keyboard_report_descriptor), EPNUM_HID, CFG_TUD_HID_EP_BUFSIZE, 1)
+  TUD_HID_DESCRIPTOR(ITF_NUM_HID_KEYBOARD, 0, HID_ITF_PROTOCOL_KEYBOARD, sizeof(keyboard_report_descriptor), EPNUM_HID, CFG_TUD_HID_EP_BUFSIZE, 1)
 };

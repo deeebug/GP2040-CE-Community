@@ -61,8 +61,8 @@ static XInputReport xinputReport
 static KeyboardReport keyboardReport
 {
 	.modifier = 0,
-	.reserved = 0,
-	.keycode = { 0, 0, 0, 0, 0, 0 }
+	//.reserved = 0,
+	.keycode = { 0 }
 };
 
 void Gamepad::setup()
