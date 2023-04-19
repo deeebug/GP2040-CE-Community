@@ -15,14 +15,12 @@ enum {
 };
 
 #endif /* USB_DESCRIPTORS_H_ */
-#define REPORT_BYTES 8
+#define REPORT_BYTES 104
 
 /// Standard HID Boot Protocol Keyboard Report.
 typedef struct TU_ATTR_PACKED
 {
-  uint8_t modifier;   /**< Keyboard modifier (KEYBOARD_MODIFIER_* masks). */
- // uint8_t reserved;   /**< Reserved for OEM use, always set to 0. */
-  uint8_t keycode[REPORT_BYTES - 1]; /**< Key codes of the currently pressed keys. */
+  uint8_t keycode[16]; /**< Key codes of the currently pressed keys. */
 } KeyboardReport;
 
 static const uint8_t keyboard_string_language[]    = { 0x09, 0x04 };
@@ -67,38 +65,41 @@ enum
 #define EPNUM_HID   0x81
 
 static const uint8_t keyboard_report_descriptor[] = {
-  0x05, 0x01,                     // Usage Page (Generic Desktop),
-        0x09, 0x06,                     // Usage (Keyboard),
-        0xA1, 0x01,                     // Collection (Application),
-        // bitmap of modifiers
-        0x75, 0x01,                     //   Report Size (1),
-        0x95, 0x08,                     //   Report Count (8),
-        0x05, 0x07,                     //   Usage Page (Key Codes),
-        0x19, 0xE0,                     //   Usage Minimum (224),
-        0x29, 0xE7,                     //   Usage Maximum (231),
-        0x15, 0x00,                     //   Logical Minimum (0),
-        0x25, 0x01,                     //   Logical Maximum (1),
-        0x81, 0x02,                     //   Input (Data, Variable, Absolute), ;Modifier byte
-        // LED output report
-        0x95, 0x05,                     //   Report Count (5),
-        0x75, 0x01,                     //   Report Size (1),
-        0x05, 0x08,                     //   Usage Page (LEDs),
-        0x19, 0x01,                     //   Usage Minimum (1),
-        0x29, 0x05,                     //   Usage Maximum (5),
-        0x91, 0x02,                     //   Output (Data, Variable, Absolute),
-        0x95, 0x01,                     //   Report Count (1),
-        0x75, 0x03,                     //   Report Size (3),
-        0x91, 0x03,                     //   Output (Constant),
-        // bitmap of keys
-        0x95, (REPORT_BYTES-1)*8,	//   Report Count (),
-        0x75, 0x01,                     //   Report Size (1),
-        0x15, 0x00,                     //   Logical Minimum (0),
-        0x25, 0x01,                     //   Logical Maximum(1),
-        0x05, 0x07,                     //   Usage Page (Key Codes),
-        0x19, 0x00,                     //   Usage Minimum (0),
-        0x29, (REPORT_BYTES-1)*8-1,	//   Usage Maximum (),
-        0x81, 0x02,                     //   Input (Data, Variable, Absolute),
-        0xc0                            // End Collection
+  0x05, 0x01,										// Usage Page (Generic Desktop),
+	0x09, 0x06,										// Usage (Keyboard),
+	0xA1, 0x01,										// Collection (Application),
+	// Modifier Keys
+	0x05, 0x07,											// Usage Page (Key Codes),
+	0x19, 0xE0,											// Usage Minimum (224),
+	0x29, 0xE7,											// Usage Maximum (231),
+	0x15, 0x00,											// Logical Minimum (0),
+	0x25, 0x01,											// Logical Maximum (1),
+	0x75, 0x01,											// Report Size (1),
+	0x95, 0x08,											// Report Count (8),
+	0x81, 0x02,											// Input (Data, Variable, Absolute),				;Modifier byte (0)
+	// LEDS
+	0x05, 0x08,											// Usage Page (LEDs),
+	0x19, 0x01,											// Usage Minimum (1),
+	0x29, 0x05,											// Usage Maximum (5),
+	0x75, 0x01,											// Report Size (1),
+	0x95, 0x05,											// Report Count (5),
+	0x91, 0x02,											// Output (Data, Variable, Absolute),				;LED Report (5/8)
+	0x75, 0x03,											// Report Size (3),
+	0x95, 0x01,											// Report Count (1),
+	0x91, 0x03,											// Output (Constant, Variable, Absolute),			;LED Report padding (8/8)
+	// Keys
+	0x05, 0x07,											// Usage Page (Key Codes),
+	0x19, 0x00,											// Usage Minimum (0),
+	0x29, REPORT_BYTES - 1,							// Usage Maximum (103),
+	0x15, 0x00,											// Logical Minimum (0),
+	0x25, 0x01,											// Logical Maximum (1),
+	0x75, 0x01,											// Report Size (1),
+	0x95, REPORT_BYTES,								// Report Count (104),
+	0x81, 0x02,											// Input (Data, Variable, Absolute),				;Key byte (1-13)
+	0x75, 0x08,											// Report Size (8),
+	0x95, 0x02,											// Report Count (2),
+	0x81, 0x03,											// Input (Constant, Variable, Absolute),			;Key byte padding (14-15)
+	0xC0											// End Collection
 };
 
 // Interface number, string index, protocol, report descriptor len, EP In address, size & polling interval

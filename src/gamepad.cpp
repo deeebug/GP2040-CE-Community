@@ -60,7 +60,7 @@ static XInputReport xinputReport
 
 static KeyboardReport keyboardReport
 {
-	.modifier = 0,
+	// .modifier = 0, 
 	//.reserved = 0,
 	.keycode = { 0 }
 };
@@ -458,16 +458,35 @@ XInputReport *Gamepad::getXInputReport()
 	return &xinputReport;
 }
 
+static void pressKey(uint8_t code) {
+	if ((code >> 3) < REPORT_BYTES - 2) {
+		keyboardReport.keycode[(code >> 3) + 1] |= 1 << (code & 7);
+	}
+}
+
+static void releaseAll(void) {
+	for (uint8_t i = 0; i < REPORT_BYTES; i++) {
+		keyboardReport.keycode[i] = 0;
+	}
+}
+
 KeyboardReport *Gamepad::getKeyboardReport()
 {
-	keyboardReport.keycode[0] = pressedUp() ? HID_KEY_W : HID_KEY_NONE;
-	keyboardReport.keycode[1] = pressedDown() ? HID_KEY_A : HID_KEY_NONE;
-	keyboardReport.keycode[2] = pressedLeft() ? HID_KEY_S : HID_KEY_NONE;
-	keyboardReport.keycode[3] = pressedRight() ? HID_KEY_D : HID_KEY_NONE;
-	keyboardReport.keycode[4] = pressedB1() ? HID_KEY_Y : HID_KEY_NONE;
-	keyboardReport.keycode[5] = pressedB2() ? HID_KEY_U : HID_KEY_NONE;
+	releaseAll();
+	if(pressedUp())  {
+		pressKey(HID_KEY_W);
+		pressKey(HID_KEY_A);
+		pressKey(HID_KEY_S);
+		pressKey(HID_KEY_D);
+	}
+	// keyboardReport.keycode[1] = pressedDown() ? HID_KEY_A : HID_KEY_NONE;
+	// keyboardReport.keycode[2] = pressedLeft() ? HID_KEY_S : HID_KEY_NONE;
+	// keyboardReport.keycode[3] = pressedRight() ? HID_KEY_D : HID_KEY_NONE;
+	// keyboardReport.keycode[4] = pressedB1() ? HID_KEY_Y : HID_KEY_NONE;
+	// keyboardReport.keycode[5] = pressedB2() ? HID_KEY_U : HID_KEY_NONE;
 	return &keyboardReport;
 }
+
 
 /* Gamepad stuffs */
 void GamepadStorage::start()
