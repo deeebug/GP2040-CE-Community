@@ -473,17 +473,20 @@ static void releaseAll(void) {
 KeyboardReport *Gamepad::getKeyboardReport()
 {
 	releaseAll();
-	if(pressedUp())  {
-		pressKey(HID_KEY_W);
-		pressKey(HID_KEY_A);
-		pressKey(HID_KEY_S);
-		pressKey(HID_KEY_D);
-	}
-	// keyboardReport.keycode[1] = pressedDown() ? HID_KEY_A : HID_KEY_NONE;
-	// keyboardReport.keycode[2] = pressedLeft() ? HID_KEY_S : HID_KEY_NONE;
-	// keyboardReport.keycode[3] = pressedRight() ? HID_KEY_D : HID_KEY_NONE;
-	// keyboardReport.keycode[4] = pressedB1() ? HID_KEY_Y : HID_KEY_NONE;
-	// keyboardReport.keycode[5] = pressedB2() ? HID_KEY_U : HID_KEY_NONE;
+	if(pressedUp()) 	{ pressKey(HID_KEY_W); }
+	if(pressedDown()) 	{ pressKey(HID_KEY_S); }
+	if(pressedLeft())	{ pressKey(HID_KEY_A); }
+	if(pressedRight()) 	{ pressKey(HID_KEY_D); }
+	if(pressedB1()) 	{ pressKey(HID_KEY_H); }
+	if(pressedB2()) 	{ pressKey(HID_KEY_J); }
+	if(pressedB3()) 	{ pressKey(HID_KEY_Y); }
+	if(pressedB4()) 	{ pressKey(HID_KEY_U); }
+	if(pressedL1()) 	{ pressKey(HID_KEY_O); }
+	if(pressedL2()) 	{ pressKey(HID_KEY_I); }
+	if(pressedL3()) 	{ pressKey(HID_KEY_P); }
+	if(pressedR1()) 	{ pressKey(HID_KEY_L); }
+	if(pressedR2()) 	{ pressKey(HID_KEY_K); }
+	if(pressedR3()) 	{ pressKey(HID_KEY_SEMICOLON); }
 	return &keyboardReport;
 }
 
