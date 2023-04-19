@@ -10,7 +10,6 @@
 #define SWITCH_ENDPOINT_SIZE 64
 
 // HAT report (4 bits)
-// TODO: This needs to be reworked into independent directions
 #define SWITCH_HAT_UP        0x00
 #define SWITCH_HAT_UPRIGHT   0x01
 #define SWITCH_HAT_RIGHT     0x02
@@ -170,7 +169,6 @@ static const uint8_t switch_report_descriptor[] =
 	0x75, 0x04,        //   Report Size (4)
 	0x95, 0x01,        //   Report Count (1)
 	0x65, 0x14,        //   Unit (System: English Rotation, Length: Centimeter)
-	// TODO: Does this need changing?
 	0x09, 0x39,        //   Usage (Hat switch)
 	0x81, 0x42,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,Null State)
 	0x65, 0x00,        //   Unit (None)

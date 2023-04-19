@@ -25,7 +25,7 @@ static HIDReport hidReport
 	.square_btn = 0, .cross_btn = 0, .circle_btn = 0, .triangle_btn = 0,
 	.l1_btn = 0, .r1_btn = 0, .l2_btn = 0, .r2_btn = 0,
 	.select_btn = 0, .start_btn = 0, .l3_btn = 0, .r3_btn = 0, .ps_btn = 0,
-	.direction_up = 0, .direction_down = 0, .direction_left = 0, .direction_right = 0,
+	.direction = 0x08,
 	.l_x_axis = 0x80, .l_y_axis = 0x80, .r_x_axis = 0x80, .r_y_axis = 0x80,
 	.right_axis = 0x00, .left_axis = 0x00, .up_axis = 0x00, .down_axis = 0x00,
 	.triangle_axis = 0x00, .circle_axis = 0x00, .cross_axis = 0x00, .square_axis = 0x00,
@@ -35,7 +35,6 @@ static HIDReport hidReport
 static SwitchReport switchReport
 {
 	.buttons = 0,
-	// TODO: This needs to be reworked into independent directions
 	.hat = SWITCH_HAT_NOTHING,
 	.lx = SWITCH_JOYSTICK_MID,
 	.ly = SWITCH_JOYSTICK_MID,
@@ -326,24 +325,33 @@ uint16_t Gamepad::getReportSize()
 
 HIDReport *Gamepad::getHIDReport()
 {
-	hidReport.direction_up    = pressedUp();
-	hidReport.direction_down  = pressedDown();
-	hidReport.direction_left  = pressedLeft();
-	hidReport.direction_right = pressedRight();
-	hidReport.cross_btn       = pressedB1();
-	hidReport.circle_btn      = pressedB2();
-	hidReport.square_btn      = pressedB3();
-	hidReport.triangle_btn    = pressedB4();
-	hidReport.l1_btn          = pressedL1();
-	hidReport.r1_btn          = pressedR1();
-	hidReport.l2_btn          = pressedL2();
-	hidReport.r2_btn          = pressedR2();
-	hidReport.select_btn      = pressedS1();
-	hidReport.start_btn       = pressedS2();
-	hidReport.l3_btn          = pressedL3();
-	hidReport.r3_btn          = pressedR3();
-	hidReport.ps_btn          = pressedA1();
-//	hidReport.cross_btn       = pressedA2();
+	switch (state.dpad & GAMEPAD_MASK_DPAD)
+	{
+		case GAMEPAD_MASK_UP:                        hidReport.direction = HID_HAT_UP;        break;
+		case GAMEPAD_MASK_UP | GAMEPAD_MASK_RIGHT:   hidReport.direction = HID_HAT_UPRIGHT;   break;
+		case GAMEPAD_MASK_RIGHT:                     hidReport.direction = HID_HAT_RIGHT;     break;
+		case GAMEPAD_MASK_DOWN | GAMEPAD_MASK_RIGHT: hidReport.direction = HID_HAT_DOWNRIGHT; break;
+		case GAMEPAD_MASK_DOWN:                      hidReport.direction = HID_HAT_DOWN;      break;
+		case GAMEPAD_MASK_DOWN | GAMEPAD_MASK_LEFT:  hidReport.direction = HID_HAT_DOWNLEFT;  break;
+		case GAMEPAD_MASK_LEFT:                      hidReport.direction = HID_HAT_LEFT;      break;
+		case GAMEPAD_MASK_UP | GAMEPAD_MASK_LEFT:    hidReport.direction = HID_HAT_UPLEFT;    break;
+		default:                                     hidReport.direction = HID_HAT_NOTHING;   break;
+	}
+
+	hidReport.cross_btn    = pressedB1();
+	hidReport.circle_btn   = pressedB2();
+	hidReport.square_btn   = pressedB3();
+	hidReport.triangle_btn = pressedB4();
+	hidReport.l1_btn       = pressedL1();
+	hidReport.r1_btn       = pressedR1();
+	hidReport.l2_btn       = pressedL2();
+	hidReport.r2_btn       = pressedR2();
+	hidReport.select_btn   = pressedS1();
+	hidReport.start_btn    = pressedS2();
+	hidReport.l3_btn       = pressedL3();
+	hidReport.r3_btn       = pressedR3();
+	hidReport.ps_btn       = pressedA1();
+//	hidReport.cross_btn = pressedA2();
 
 	hidReport.l_x_axis = static_cast<uint8_t>(state.lx >> 8);
 	hidReport.l_y_axis = static_cast<uint8_t>(state.ly >> 8);
@@ -356,25 +364,34 @@ HIDReport *Gamepad::getHIDReport()
 
 SwitchReport *Gamepad::getSwitchReport()
 {
+	switch (state.dpad & GAMEPAD_MASK_DPAD)
+	{
+		case GAMEPAD_MASK_UP:                        switchReport.hat = SWITCH_HAT_UP;        break;
+		case GAMEPAD_MASK_UP | GAMEPAD_MASK_RIGHT:   switchReport.hat = SWITCH_HAT_UPRIGHT;   break;
+		case GAMEPAD_MASK_RIGHT:                     switchReport.hat = SWITCH_HAT_RIGHT;     break;
+		case GAMEPAD_MASK_DOWN | GAMEPAD_MASK_RIGHT: switchReport.hat = SWITCH_HAT_DOWNRIGHT; break;
+		case GAMEPAD_MASK_DOWN:                      switchReport.hat = SWITCH_HAT_DOWN;      break;
+		case GAMEPAD_MASK_DOWN | GAMEPAD_MASK_LEFT:  switchReport.hat = SWITCH_HAT_DOWNLEFT;  break;
+		case GAMEPAD_MASK_LEFT:                      switchReport.hat = SWITCH_HAT_LEFT;      break;
+		case GAMEPAD_MASK_UP | GAMEPAD_MASK_LEFT:    switchReport.hat = SWITCH_HAT_UPLEFT;    break;
+		default:                                     switchReport.hat = SWITCH_HAT_NOTHING;   break;
+	}
+
 	switchReport.buttons = 0
-		| (pressedUp()    ? SWITCH_MASK_UP      : 0)
-		| (pressedDown()  ? SWITCH_MASK_DOWN    : 0)
-		| (pressedLeft()  ? SWITCH_MASK_LEFT    : 0)
-		| (pressedRight() ? SWITCH_MASK_RIGHT   : 0)
-		| (pressedB1()    ? SWITCH_MASK_B       : 0)
-		| (pressedB2()    ? SWITCH_MASK_A       : 0)
-		| (pressedB3()    ? SWITCH_MASK_Y       : 0)
-		| (pressedB4()    ? SWITCH_MASK_X       : 0)
-		| (pressedL1()    ? SWITCH_MASK_L       : 0)
-		| (pressedR1()    ? SWITCH_MASK_R       : 0)
-		| (pressedL2()    ? SWITCH_MASK_ZL      : 0)
-		| (pressedR2()    ? SWITCH_MASK_ZR      : 0)
-		| (pressedS1()    ? SWITCH_MASK_MINUS   : 0)
-		| (pressedS2()    ? SWITCH_MASK_PLUS    : 0)
-		| (pressedL3()    ? SWITCH_MASK_L3      : 0)
-		| (pressedR3()    ? SWITCH_MASK_R3      : 0)
-		| (pressedA1()    ? SWITCH_MASK_HOME    : 0)
-		| (pressedA2()    ? SWITCH_MASK_CAPTURE : 0)
+		| (pressedB1() ? SWITCH_MASK_B       : 0)
+		| (pressedB2() ? SWITCH_MASK_A       : 0)
+		| (pressedB3() ? SWITCH_MASK_Y       : 0)
+		| (pressedB4() ? SWITCH_MASK_X       : 0)
+		| (pressedL1() ? SWITCH_MASK_L       : 0)
+		| (pressedR1() ? SWITCH_MASK_R       : 0)
+		| (pressedL2() ? SWITCH_MASK_ZL      : 0)
+		| (pressedR2() ? SWITCH_MASK_ZR      : 0)
+		| (pressedS1() ? SWITCH_MASK_MINUS   : 0)
+		| (pressedS2() ? SWITCH_MASK_PLUS    : 0)
+		| (pressedL3() ? SWITCH_MASK_L3      : 0)
+		| (pressedR3() ? SWITCH_MASK_R3      : 0)
+		| (pressedA1() ? SWITCH_MASK_HOME    : 0)
+		| (pressedA2() ? SWITCH_MASK_CAPTURE : 0)
 	;
 
 	switchReport.lx = static_cast<uint8_t>(state.lx >> 8);
