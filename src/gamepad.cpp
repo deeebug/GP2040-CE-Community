@@ -473,20 +473,24 @@ static void releaseAll(void) {
 KeyboardReport *Gamepad::getKeyboardReport()
 {
 	releaseAll();
-	if(pressedUp()) 	{ pressKey(HID_KEY_W); }
-	if(pressedDown()) 	{ pressKey(HID_KEY_S); }
-	if(pressedLeft())	{ pressKey(HID_KEY_A); }
-	if(pressedRight()) 	{ pressKey(HID_KEY_D); }
-	if(pressedB1()) 	{ pressKey(HID_KEY_H); }
-	if(pressedB2()) 	{ pressKey(HID_KEY_J); }
-	if(pressedB3()) 	{ pressKey(HID_KEY_Y); }
-	if(pressedB4()) 	{ pressKey(HID_KEY_U); }
-	if(pressedL1()) 	{ pressKey(HID_KEY_O); }
-	if(pressedL2()) 	{ pressKey(HID_KEY_I); }
-	if(pressedL3()) 	{ pressKey(HID_KEY_P); }
-	if(pressedR1()) 	{ pressKey(HID_KEY_L); }
-	if(pressedR2()) 	{ pressKey(HID_KEY_K); }
-	if(pressedR3()) 	{ pressKey(HID_KEY_SEMICOLON); }
+	if(pressedUp())     { pressKey(options.keyDpadUp); }
+	if(pressedDown())   { pressKey(options.keyDpadDown); }
+	if(pressedLeft())	{ pressKey(options.keyDpadLeft); }
+	if(pressedRight()) 	{ pressKey(options.keyDpadRight); }
+	if(pressedB1()) 	{ pressKey(options.keyButtonB1); }
+	if(pressedB2()) 	{ pressKey(options.keyButtonB2); }
+	if(pressedB3()) 	{ pressKey(options.keyButtonB3); }
+	if(pressedB4()) 	{ pressKey(options.keyButtonB4); }
+	if(pressedL1()) 	{ pressKey(options.keyButtonL1); }
+	if(pressedR1()) 	{ pressKey(options.keyButtonR1); }
+	if(pressedL2()) 	{ pressKey(options.keyButtonL2); }
+	if(pressedR2()) 	{ pressKey(options.keyButtonR2); }
+	if(pressedS1()) 	{ pressKey(options.keyButtonS1); }
+	if(pressedS2()) 	{ pressKey(options.keyButtonS2); }
+	if(pressedL3()) 	{ pressKey(options.keyButtonL3); }
+	if(pressedR3()) 	{ pressKey(options.keyButtonR3); }
+	if(pressedA1()) 	{ pressKey(options.keyButtonA1); }
+	if(pressedA2()) 	{ pressKey(options.keyButtonA2); }
 	return &keyboardReport;
 }
 
@@ -520,6 +524,24 @@ GamepadOptions GamepadStorage::getGamepadOptions()
 #endif
 		options.invertXAxis = false;
 		options.invertYAxis = false;
+		options.keyDpadUp    = HID_KEY_W;
+		options.keyDpadDown  = HID_KEY_S;
+		options.keyDpadLeft  = HID_KEY_A;
+		options.keyDpadRight = HID_KEY_D;
+		options.keyButtonB1  = HID_KEY_H;
+		options.keyButtonB2  = HID_KEY_J;
+		options.keyButtonB3  = HID_KEY_Y;
+		options.keyButtonB4  = HID_KEY_U;
+		options.keyButtonL1  = HID_KEY_O;
+		options.keyButtonR1  = HID_KEY_L;
+		options.keyButtonL2  = HID_KEY_I;
+		options.keyButtonR2  = HID_KEY_K;
+		options.keyButtonS1  = HID_KEY_BACKSPACE;
+		options.keyButtonS2  = HID_KEY_ENTER;
+		options.keyButtonL3  = HID_KEY_P;
+		options.keyButtonR3  = HID_KEY_SEMICOLON;
+		options.keyButtonA1  = HID_KEY_NONE;
+		options.keyButtonA2  = HID_KEY_NONE;
 		setGamepadOptions(options);
 	}
 
