@@ -64,6 +64,8 @@ void GP2040::setup() {
 		case BootAction::SET_INPUT_MODE_HID:
 		case BootAction::SET_INPUT_MODE_SWITCH:
 		case BootAction::SET_INPUT_MODE_XINPUT:
+		case BootAction::SET_INPUT_MODE_PS4:
+		case BootAction::SET_INPUT_MODE_KEYBOARD:
 		case BootAction::NONE:
 			{
 				InputMode inputMode = gamepad->options.inputMode;
@@ -73,6 +75,10 @@ void GP2040::setup() {
 					inputMode = INPUT_MODE_SWITCH;
 				} else if (bootAction == BootAction::SET_INPUT_MODE_XINPUT) {
 					inputMode = INPUT_MODE_XINPUT;
+				} else if (bootAction == BootAction::SET_INPUT_MODE_PS4) {
+					inputMode = INPUT_MODE_PS4;
+				} else if (bootAction == BootAction::SET_INPUT_MODE_KEYBOARD) {
+					inputMode = INPUT_MODE_KEYBOARD;
 				}
 
 				if (inputMode != gamepad->options.inputMode) {
@@ -93,7 +99,7 @@ void GP2040::setup() {
 	addons.LoadAddon(new AnalogInput(), CORE0_INPUT);
 	addons.LoadAddon(new BootselButtonAddon(), CORE0_INPUT);
 	addons.LoadAddon(new DualDirectionalInput(), CORE0_INPUT);
-  addons.LoadAddon(new ExtraButtonAddon(), CORE0_INPUT);
+  	addons.LoadAddon(new ExtraButtonAddon(), CORE0_INPUT);
 	addons.LoadAddon(new I2CAnalog1219Input(), CORE0_INPUT);
 	addons.LoadAddon(new JSliderInput(), CORE0_INPUT);
 	addons.LoadAddon(new ReverseInput(), CORE0_INPUT);
@@ -171,12 +177,16 @@ GP2040::BootAction GP2040::getBootAction() {
 					return BootAction::ENTER_USB_MODE;
 				} else if (gamepad->pressedS2()) {
 					return BootAction::ENTER_WEBCONFIG_MODE;
-				} else if (gamepad->pressedB3()) {
+				} else if (gamepad->pressedB3()) { // P1
 					return BootAction::SET_INPUT_MODE_HID;
-				} else if (gamepad->pressedB1()) {
+				} else if (gamepad->pressedB4()) { // P2
+					return BootAction::SET_INPUT_MODE_PS4;
+				} else if (gamepad->pressedB1()) { // K1
 					return BootAction::SET_INPUT_MODE_SWITCH;
-				} else if (gamepad->pressedB2()) {
+				} else if (gamepad->pressedB2()) { // K2
 					return BootAction::SET_INPUT_MODE_XINPUT;
+				} else if (gamepad->pressedR2()) { // K3
+					return BootAction::SET_INPUT_MODE_KEYBOARD;
 				} else {
 					return BootAction::NONE;
 				}
