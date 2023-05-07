@@ -3,4 +3,5 @@
 * [GP2040-CE Shortcuts](gp2040-shortcuts)
 * [Web Configurator](web-configurator)
 * [Development](development)
+* [Downloads](downloads)
 * [FAQ](https://gp2040-ce.info/#/?id=frequently-asked-questions)

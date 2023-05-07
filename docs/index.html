@@ -65,6 +65,7 @@
 	<script src="//cdn.jsdelivr.net/npm/prismjs@1.x/components/prism-c.min.js"></script>
 	<script src="//cdn.jsdelivr.net/npm/prismjs@1.x/components/prism-cpp.min.js"></script>
 	<script src="//cdn.jsdelivr.net/npm/prismjs@1.x/components/prism-ini.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 	<script>
 		Vue.use(VScrollThreshold);
@@ -95,8 +96,16 @@
 							"Arcade": { "name": "Arcade", "Up": "Up", "Down": "Down", "Left": "Left", "Right": "Right", "B1": "K1", "B2": "K2", "B3": "P1", "B4": "P2", "L1": "P4", "R1": "P3", "L2": "K4", "R2": "K3", "S1": "Select", "S2": "Start", "L3": "LS", "R3": "RS", "A1": "Home", "A2": "(A2)" },
 						},
 						selectedLabels: localStorage.getItem('selectedLabels') || 'GP2040',
+						releaseInfo: { assets: [] }
 					}
 				},
+				mounted() {
+						fetch("https://api.github.com/repos/OpenStickCommunity/GP2040-CE/releases/latest", {
+							"method": "GET",
+						}).then(response => response.json()).then(data => {
+							this.releaseInfo = data
+						});
+					}
 			},
 			vueComponents: {
 				'label-selector': {
@@ -137,6 +146,35 @@
 						};
 					},
 				},
+				'version-name': {
+					template: `
+						<div>
+							<div>Latest version: <strong v-text="name" v-if="name"></strong></div>
+						</div>`,
+					data () {
+						return {
+							name: this.$root.releaseInfo.name,
+						};
+					}
+				},
+				'version-details': {
+					template: `
+						<div>
+							<ul id="releases">
+								<li v-for="item in artifacts">
+									<a :href="item.url" :key="item.name">{{ item.name }}</a>
+								</li>
+							</ul>
+							<div v-html="body"></div>
+						</div>
+					`,
+					data() {
+						return {
+							artifacts: this.$root.releaseInfo.assets.map(({name, browser_download_url}) => ({name, url: browser_download_url})),
+							body: marked.parse(this.$root.releaseInfo.body ? "## Release Notes\r\n" + this.$root.releaseInfo.body : ""),
+						}
+					}	
+				}
 			}
 		};
 	</script>
