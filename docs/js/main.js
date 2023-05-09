@@ -34,12 +34,18 @@ window.$docsify = {
 		'download-box': {
 			props: ['release'],
 			template: `
-				<a :href="release.url">
-					<div>
-						<img :src="'/assets/boards/' + release.key + '.jpg'">
-						<span>{{ release.name }}</span>
-					</div>
-				</a>
+				<div class="download-box">
+					<a class="download-link" :href="release.link">
+						<img class="download-img" :src="'/assets/boards/' + release.key + '.jpg'">
+						<div class="download-info">
+							<span class="download-title">{{ release.name }}</span>
+							<div v-if="release.url">
+								<a class="homepage-link" :href="release.url" target="_blank">Website</a>
+							</div>
+							<div class="download-desc" v-if="release.desc" v-html="release.desc"></div>
+						</div>
+					</a>
+				</div>
 			`,
 		},
 
@@ -67,23 +73,23 @@ window.$docsify = {
 
 		'download-page': {
 			template: `
-			<div v-if="fetched">
-				<version-name></version-name>
-				<download-category
-				v-for="category of boardCategories"
-				:key="category"
-				:category="category">
-				</download-category>
-				<div>
-					<h3>Flash Nuke</h3>
-					<p>
-						Use the <a href="https://raw.githubusercontent.com/OpenStickCommunity/GP2040-CE/main/docs/downloads/flash_nuke.uf2">flash_nuke.uf2</a>
-						file to completely erase the flash of the RP2040 board. <strong>THIS WILL ERASE ALL SAVED SETTINGS!</strong>
-						Use this prior to flashing GP2040-CE on your device if you want to start from a clean slate, or as a troubleshooting step before to reporting an issue.
-					</p>
+				<div v-if="fetched">
+					<version-name></version-name>
+					<download-category
+					v-for="category of boardCategories"
+					:key="category"
+					:category="category">
+					</download-category>
+					<div>
+						<h3>Flash Nuke</h3>
+						<p>
+							Use the <a href="https://raw.githubusercontent.com/OpenStickCommunity/GP2040-CE/main/docs/downloads/flash_nuke.uf2">flash_nuke.uf2</a>
+							file to completely erase the flash of the RP2040 board. <strong>THIS WILL ERASE ALL SAVED SETTINGS!</strong>
+							Use this prior to flashing GP2040-CE on your device if you want to start from a clean slate, or as a troubleshooting step before to reporting an issue.
+						</p>
+					</div>
+					<release-notes></release-notes>
 				</div>
-				<release-notes></release-notes>
-			</div>
 			`,
 			data() {
 				return {
@@ -108,12 +114,12 @@ window.$docsify = {
 							.sort(a => a.name)
 							.map(a => {
 								const key = a.name.substring(a.name.lastIndexOf('_') + 1).replace('.uf2', '');
+								const board = boardDefinitions[key];
 								return {
+									...board,
 									key,
-									name: boardDefinitions[key].name,
-									url: a.browser_download_url,
 									img: `/assets/boards/${key}.jpg`,
-									category: boardDefinitions[key].category,
+									link: a.browser_download_url,
 								};
 							})
 							.reduce((p, r) => {
@@ -183,10 +189,10 @@ window.$docsify = {
 				<div v-html="body"></div>
 			`,
 			data() {
-				marked.use({ renderer })
+				marked.use({ renderer });
 				return {
 					body: marked.parse(this.$root.releaseNotes ? "## Release Notes\r\n" + this.$root.releaseNotes : ""),
-				}
+				};
 			},
 		},
 

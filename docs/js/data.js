@@ -1,19 +1,81 @@
 const boardCategories = ['Microcontroller Boards', 'Open Source Devices', 'Closed Source Devices', 'Legacy Devices'];
 
 const boardDefinitions = {
-	BentoBox                   : { name: 'ScrubTier BentoBox', category: 'Closed Source Devices', },
-	DURAL                      : { name: 'BatiKING DURAL', category: 'Legacy Devices', },
-	FightboardV3               : { name: 'thnikk Fightboard V3', category: 'Legacy Devices', },
-	FightboardV3Mirrored       : { name: 'thnikk Fightboard V3 (Mirrored)', category: 'Legacy Devices', },
-	FlatboxRev4                : { name: 'Flatbox Rev 4', category: 'Open Source Devices', },
-	FlatboxRev5                : { name: 'Flatbox Rev 5', category: 'Open Source Devices', },
-	MavercadeKeebfighter       : { name: 'Mavercade Keebfighter', category: 'Closed Source Devices', },
-	Pico                       : { name: 'Raspberry Pi Pico', category: 'Microcontroller Boards', },
-	PicoFightingBoard          : { name: 'Pico Fighting Board', category: 'Open Source Devices', },
-	RP2040AdvancedBreakoutBoard: { name: 'RP2040 Advanced Breakout Board', category: 'Open Source Devices', },
-	ReflexEncoder              : { name: 'MiSTerAddons Reflex Arcade Encoder', category: 'Open Source Devices', },
-	SparkFunProMicro           : { name: 'SparkFun Pro Micro', category: 'Microcontroller Boards', },
-	WaveshareZero              : { name: 'Waveshare RP2040-Zero', category: 'Microcontroller Boards', },
+	BentoBox: {
+		name: 'ScrubTier BentoBox',
+		desc: '',
+		category: 'Closed Source Devices',
+	},
+	DURAL: {
+		name: 'BatiKING DURAL',
+		desc: '',
+		category: 'Legacy Devices',
+		url: 'https://github.com/BatiKING/DURAL_DIY',
+	},
+	FightboardV3: {
+		name: 'thnikk Fightboard V3',
+		desc: '',
+		category: 'Legacy Devices',
+	},
+	FightboardV3Mirrored: {
+		name: 'thnikk Fightboard V3 (Mirrored)',
+		desc: '',
+		category: 'Legacy Devices',
+	},
+	FlatboxRev4: {
+		name: 'Flatbox Rev 4',
+		desc: '',
+		category: 'Open Source Devices',
+	},
+	FlatboxRev5: {
+		name: 'Flatbox Rev 5',
+		desc: '',
+		category: 'Open Source Devices',
+	},
+	MavercadeKeebfighter: {
+		name: 'Mavercade Keebfighter',
+		desc: '',
+		category: 'Closed Source Devices',
+	},
+	Pico: {
+		name: 'Raspberry Pi Pico',
+		desc: 'An affordable dual-core microcontroller developed by Raspberry Pi. This is the standard GP2040-CE build.',
+		category: 'Microcontroller Boards',
+		url: 'https://www.raspberrypi.com/products/raspberry-pi-pico/',
+	},
+	PicoAnn: {
+		name: 'PicoAnn',
+		desc: '',
+		category: 'Legacy Devices',
+	},
+	PicoFightingBoard: {
+		name: 'Pico Fighting Board',
+		desc: 'Pico breakout board that mimics the style of typical fightstick encoder boards. Developed by FeralAI.',
+		category: 'Open Source Devices',
+		url: 'https://github.com/FeralAI/PicoFightingBoard',
+	},
+	RP2040AdvancedBreakoutBoar: {
+		name: 'RP2040 Advanced Breakout Board',
+		desc: '',
+		category: 'Open Source Devices',
+	},
+	ReflexEncoder: {
+		name: 'MiSTerAddons Reflex Arcade Encoder',
+		desc: '',
+		category: 'Open Source Devices',
+	},
+	SparkFunProMicro: {
+		name: 'SparkFun Pro Micro RP2040',
+		desc: 'An RP2040 board in the Pro Micro form factor. The GP2040-CE build is a drop-in replacement for the popular <a href="https://github.com/MickGyver/DaemonBite-Arcade-Encoder">Daemonbite Arcade Encoder</a>.',
+		category: 'Microcontroller Boards',
+		url: 'https://www.sparkfun.com/products/18288',
+	},
+	WaveshareZero: {
+		name: 'Waveshare RP2040-Zero',
+		desc: 'A full RP2040 board in a small form factor. The size, shape and castellated pins make this a great module for board designers that don\'t want to fully integrate an RP2040 chip on their board.',
+		category: 'Microcontroller Boards',
+		url: 'https://www.waveshare.com/rp2040-zero.htm',
+	},
 };
 
 const labelData = {
