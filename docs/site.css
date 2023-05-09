@@ -4,8 +4,9 @@
 	--modular-scale   : 1.25;
   --base-font-size: 0.875rem;
   --theme-color   : #C73C8B;
-  --sidebar-width : 20rem;
-	--sidebar-padding: 0 0.75rem;
+  --sidebar-width : 25rem;
+	--sidebar-nav-indent: 0.75em;
+	/* --sidebar-nav-margin: 1.5em 0 0.5em; */
 	/* --content-max-width: 75em; */
 }
 
