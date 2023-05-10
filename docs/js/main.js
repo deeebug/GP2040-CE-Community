@@ -1,9 +1,9 @@
 import { boardCategories, boardDefinitions, labelData } from './data.js';
 
-const renderer = {
-	heading(text, level) {
-		return `<h3>${text}</h3>`;
-	}
+// Create a different instance of marked Renderer to not affect the global instance
+const renderer = new marked.Renderer();
+renderer.heading = (text, level) => {
+	return `<h3>${text}</h3>`;
 };
 
 window.$docsify = {
@@ -189,9 +189,8 @@ window.$docsify = {
 				<div v-html="body"></div>
 			`,
 			data() {
-				marked.use({ renderer });
 				return {
-					body: marked.parse(this.$root.releaseNotes ? "## Release Notes\r\n" + this.$root.releaseNotes : ""),
+					body: marked.parse(this.$root.releaseNotes ? "## Release Notes\r\n" + this.$root.releaseNotes : "", { renderer }),
 				};
 			},
 		},
