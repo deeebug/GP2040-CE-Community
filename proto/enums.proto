@@ -161,3 +161,20 @@ enum ForcedSetupMode
 	FORCED_SETUP_MODE_LOCK_WEB_CONFIG = 2;
 	FORCED_SETUP_MODE_LOCK_BOTH = 3;
 };
+
+enum XInputSubtype
+{
+    option (nanopb_enumopt).long_names = false;
+    
+    XINPUT_SUBTYPE_UNKNOWN = 0;          // Unknown
+    XINPUT_SUBTYPE_GAMEPAD = 1;          // Gamepad controller
+    XINPUT_SUBTYPE_WHEEL = 2;            // Racing wheel controller
+    XINPUT_SUBTYPE_ARCADE_STICK = 3;     // Arcade stick controller
+    XINPUT_SUBTYPE_FLIGHT_STICK = 4;     // Flight stick controller
+    XINPUT_SUBTYPE_DANCE_PAD = 5;        // Dance pad controller
+    XINPUT_SUBTYPE_GUITAR = 6;           // Guitar controller
+    XINPUT_SUBTYPE_GUITAR_ALTERNATE = 7; // Alternate guitar controller
+    XINPUT_SUBTYPE_DRUM_KIT = 8;         // Drum controller
+    XINPUT_SUBTYPE_GUITAR_BASS = 9;      // Bass guitar controller
+    XINPUT_SUBTYPE_ARCADE_PAD = 10;    // Arcade pad controller
+};

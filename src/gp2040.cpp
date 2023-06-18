@@ -53,7 +53,7 @@ void GP2040::setup() {
 		case BootAction::ENTER_WEBCONFIG_MODE:
 			{
 				Storage::getInstance().SetConfigMode(true);
-				initialize_driver(INPUT_MODE_CONFIG);
+				initialize_driver(INPUT_MODE_CONFIG, gamepad->getOptions().xinputSubtype);
 				ConfigManager::getInstance().setup(CONFIG_TYPE_WEB);
 				break;	
 			}
@@ -90,7 +90,7 @@ void GP2040::setup() {
 					gamepad->save();
 				}
 
-				initialize_driver(inputMode);
+				initialize_driver(inputMode, gamepad->getOptions().xinputSubtype);
 				break;
 			}
 	}

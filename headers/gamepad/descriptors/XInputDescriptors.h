@@ -77,7 +77,7 @@ static const uint8_t xinput_device_descriptor[] =
 	0x01,       // bNumConfigurations 1
 };
 
-static const uint8_t xinput_configuration_descriptor[] =
+static uint8_t xinput_configuration_descriptor[] =
 {
 	0x09,        // bLength
 	0x02,        // bDescriptorType (Configuration)
@@ -101,7 +101,7 @@ static const uint8_t xinput_configuration_descriptor[] =
 	0x10,        // bLength
 	0x21,        // bDescriptorType (HID)
 	0x10, 0x01,  // bcdHID 1.10
-	0x01,        // bCountryCode
+	0x05,        // bCountryCode // SUBTYPE
 	0x24,        // bNumDescriptors
 	0x81,        // bDescriptorType[0] (Unknown 0x81)
 	0x14, 0x03,  // wDescriptorLength[0] 788

@@ -87,6 +87,7 @@ uint8_t const *tud_descriptor_configuration_cb(uint8_t index)
 			return web_tud_descriptor_configuration_cb(index);
 
 		case INPUT_MODE_XINPUT:
+			xinput_configuration_descriptor[22] = get_xinput_subtype();
 			return xinput_configuration_descriptor;
 
 		case INPUT_MODE_PS4:

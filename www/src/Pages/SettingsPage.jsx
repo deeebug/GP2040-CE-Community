@@ -9,8 +9,9 @@ import WebApi from '../Services/WebApi';
 import { BUTTONS } from '../Data/Buttons';
 
 const PS4Mode = 4;
+const XInputMode = 0;
 const INPUT_MODES = [
-	{ label: 'XInput', value: 0 },
+	{ label: 'XInput', value: XInputMode },
 	{ label: 'Nintendo Switch', value: 1 },
 	{ label: 'PS3/DirectInput', value: 2 },
 	{ label: 'Keyboard', value: 3 },
@@ -61,8 +62,22 @@ const FORCED_SETUP_MODES = [
 	{ label: 'Disable Input-Mode Switch and Web-Config', value: 3 },
 ];
 
+const XINPUT_SUBTYPES = [ 
+    { label: 'Gamepad', value: 1 },        // Gamepad controller.
+    { label: 'Wheel', value: 2 },          // Racing wheel controller.
+    { label: 'Arcade Stick', value: 3 },   // Arcade stick controller.
+    { label: 'Flight Stick', value: 4 },   // Flight stick controller.
+    { label: 'Dancepad', value: 5 },      // Dance pad controller.
+    { label: 'Guitar', value: 6 },         // Guitar controller.
+    { label: 'Guitar Alternate', value: 7 }, // Alternate guitar controller.
+    { label: 'Drumkit', value: 8 },       // Drum controller.
+    { label: 'Guitar Bass', value: 9 },    // Bass guitar controller.
+    { label: 'Arcadepad', value: 10 },     // Arcade pad controller.
+ ];
+
 const schema = yup.object().shape({
 	dpadMode : yup.number().required().oneOf(DPAD_MODES.map(o => o.value)).label('D-Pad Mode'),
+	xinputSubtype : yup.number().required().oneOf(XINPUT_SUBTYPES.map(o => o.value)).label('XInput Subtype'),
 	hotkeyF1 : yup.array().of(yup.object({
 		action: yup.number().required().oneOf(HOTKEY_ACTIONS.map(o => o.value)).label('Hotkey action'),
 		mask: yup.number().required().oneOf(HOTKEY_MASKS.map(o => o.value)).label('Hotkey action')
@@ -95,6 +110,8 @@ const FormContext = ({ setButtonLabels }) => {
 			values.dpadMode = parseInt(values.dpadMode);
 		if (!!values.inputMode)
 			values.inputMode = parseInt(values.inputMode);
+		if (!!values.xinputSubtype)
+			values.xinputSubtype = parseInt(values.xinputSubtype);
 		if (!!values.socdMode)
 			values.socdMode = parseInt(values.socdMode);
 		if (!!values.switchTpShareForDs4)
@@ -172,16 +189,23 @@ export default function SettingsPage() {
 								</Form.Select>
 								<Form.Control.Feedback type="invalid">{errors.inputMode}</Form.Control.Feedback>
 							</div>
+								{values.inputMode === PS4Mode && 
 							<div className="col-sm-3">
-								{values.inputMode === PS4Mode && <Form.Check
+								<Form.Check
 									label="Switch Touchpad and Share"
 									type="switch"
 									name="switchTpShareForDs4"
 									isInvalid={false}
 									checked={Boolean(values.switchTpShareForDs4)}
 									onChange={(e) => { setFieldValue("switchTpShareForDs4", e.target.checked ? 1 : 0); }}
-								/>}
-							</div>
+								/>
+							</div>}
+								{values.inputMode === XInputMode && <div className="col-sm-3">
+								<Form.Select name="xinputSubtype" className="form-select-sm" value={values.xinputSubtype} onChange={handleChange} isInvalid={errors.xinputSubtype}>
+									{XINPUT_SUBTYPES.map((o, i) => <option key={`button-xinputSubtype-option-${i}`} value={o.value}>{o.label}</option>)}
+								</Form.Select>
+								<Form.Control.Feedback type="invalid">{errors.xinputSubtype}</Form.Control.Feedback>	
+							</div>}
 						</Form.Group>
 						<Form.Group className="row mb-3">
 							<Form.Label>D-Pad Mode</Form.Label>

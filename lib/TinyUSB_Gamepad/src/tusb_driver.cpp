@@ -20,6 +20,7 @@
 
 UsbMode usb_mode = USB_MODE_HID;
 InputMode input_mode = INPUT_MODE_XINPUT;
+XInputSubtype xinput_subtype = XINPUT_SUBTYPE_GAMEPAD;
 bool usb_mounted = false;
 
 InputMode get_input_mode(void)
@@ -27,14 +28,48 @@ InputMode get_input_mode(void)
 	return input_mode;
 }
 
+uint32_t get_xinput_subtype(void)
+{
+	switch (xinput_subtype) {
+		case XINPUT_SUBTYPE_UNKNOWN:         return 0x00;
+		case XINPUT_SUBTYPE_GAMEPAD:         return 0x01;
+		case XINPUT_SUBTYPE_WHEEL:           return 0x02;
+		case XINPUT_SUBTYPE_ARCADE_STICK:    return 0x03;
+		case XINPUT_SUBTYPE_FLIGHT_STICK:    return 0x04;
+		case XINPUT_SUBTYPE_DANCE_PAD:       return 0x05;
+		case XINPUT_SUBTYPE_GUITAR:          return 0x06;
+		case XINPUT_SUBTYPE_GUITAR_ALTERNATE:return 0x07;
+		case XINPUT_SUBTYPE_DRUM_KIT:        return 0x08;
+		case XINPUT_SUBTYPE_GUITAR_BASS:     return 0x0b;
+		case XINPUT_SUBTYPE_ARCADE_PAD:   	 return 0x13;
+		default: return 0x01;
+	};
+}
+
+//enum XInputSubtype
+//{
+//    Unknown=0x00;          // Unknown.
+//    Gamepad=0x01;          // Gamepad controller.
+//    Wheel=0x02;            // Racing wheel controller.
+//    ArcadeStick=0x03;     // Arcade stick controller.
+//    FlightStick=0x04;     // Flight stick controller.
+//    DancePad=0x05;        // Dance pad controller.
+//    Guitar=0x06;           // Guitar controller.
+//    GuitarAlternate=0x07; // Alternate guitar controller.
+//    DrumKit=0x08;         // Drum controller.
+//    GuitarBass=0x0b;      // Bass guitar controller.
+//    ArcadePad=0x13;       // Arcade pad controller.
+//}
+
 bool get_usb_mounted(void)
 {
 	return usb_mounted;
 }
 
-void initialize_driver(InputMode mode)
+void initialize_driver(InputMode mode, XInputSubtype xinputSubtype)
 {
 	input_mode = mode;
+	xinput_subtype = xinputSubtype;
 	if (mode == INPUT_MODE_CONFIG)
 		usb_mode = USB_MODE_NET;
 
