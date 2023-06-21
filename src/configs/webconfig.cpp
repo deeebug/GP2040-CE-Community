@@ -534,6 +534,9 @@ std::string getGamepadOptions()
 	writeDoc(doc, "switchTpShareForDs4", gamepadOptions.switchTpShareForDs4 ? 1 : 0);
 	writeDoc(doc, "lockHotkeys", gamepadOptions.lockHotkeys ? 1 : 0);
 
+	const PinMappings& pinMappings = Storage::getInstance().getPinMappings();
+	writeDoc(doc, "fnButtonPin", pinMappings.pinButtonFn);
+
 	HotkeyOptions& hotkeyOptions = Storage::getInstance().getHotkeyOptions();
 	load_hotkey(&hotkeyOptions.hotkey01, doc, "hotkey01");
 	load_hotkey(&hotkeyOptions.hotkey02, doc, "hotkey02");
